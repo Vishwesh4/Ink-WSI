@@ -1,0 +1,55 @@
+ENGINE: #For this section ensure none of the keys are missing
+  epochs: 150
+  save_loc: /home/ramanav/projects/rrg-amartel/ramanav/Projects/InkFilter/Results  #Empty save loc indicates no save location
+  resume_loc: #Empty resume loc indicates no need to resume
+  transfer_loc: 
+  save_freq: 20
+  gpu_devices: [0]
+  use_dataparallel: false
+  location_mod: 
+  random_seed: 2022
+
+METRIC:
+  subclass_name: ink
+
+MODEL:
+  subclass_name: ink
+
+
+DATASET:
+  subclass_name: ink
+  path: "SSL_training"
+  train_batch_size: 256
+  test_batch_size: 128
+  tile_h: 256 # for wsi tile extraction
+  tile_w: 256
+  tile_stride_factor_w: 2
+  tile_stride_factor_h: 2
+  train_split: 0.8
+  template_pth: "by_class" #For ink 
+  colors: [["black","#28282B"],["#002d04","#2a7e19"],["#000133","skyblue"],["#1f0954","#6d5caf"],["#a90308","#ff000d"]]
+
+
+LOGGER:
+  subclass_name: ink
+  project_name: ink-filter
+  run_name: ink_filter
+  notes: ink filter trained on tiger dataset
+
+LOSS:
+  module_name: torch.nn
+  subclass_name: CrossEntropyLoss
+
+OPTIMIZER:
+  module_name: torch.optim
+  subclass_name: Adam
+  lr: 0.001
+  weight_decay: 0.00001
+
+SCHEDULER:
+  module_name: torch.optim.lr_scheduler
+  subclass_name: ReduceLROnPlateau
+  mode: min
+  patience: 10
+
+
