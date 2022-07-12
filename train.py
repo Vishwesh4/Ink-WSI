@@ -27,7 +27,7 @@ config_path = args.c
 location_mod = args.l
 
 # config_path = "/home/ramanav/projects/rrg-amartel/ramanav/Projects/InkFilter/config.yml"
-# location_mod = "/localscratch/ramanav.38684164.0"
+# location_mod = "/localscratch/ramanav.38885233.0"
 
 mnist_trainer = utils.TrainEngine(config_pth=config_path,location_mod=location_mod)
 mnist_trainer.run()

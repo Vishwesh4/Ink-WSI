@@ -1,6 +1,6 @@
 ENGINE: #For this section ensure none of the keys are missing
   epochs: 150
-  save_loc: /home/ramanav/projects/rrg-amartel/ramanav/Projects/InkFilter/Results  #Empty save loc indicates no save location
+  save_loc: /home/ramanav/projects/rrg-amartel/ramanav/Projects/InkFilter  #Empty save loc indicates no save location
   resume_loc: #Empty resume loc indicates no need to resume
   transfer_loc: 
   save_freq: 20
@@ -19,15 +19,16 @@ MODEL:
 DATASET:
   subclass_name: ink
   path: "SSL_training"
-  train_batch_size: 256
+  train_batch_size: 128
   test_batch_size: 128
   tile_h: 256 # for wsi tile extraction
   tile_w: 256
-  tile_stride_factor_w: 2
-  tile_stride_factor_h: 2
-  train_split: 0.8
+  tile_stride_factor_w: 7
+  tile_stride_factor_h: 7
+  train_split: 0.85
   template_pth: "by_class" #For ink 
   colors: [["black","#28282B"],["#002d04","#2a7e19"],["#000133","skyblue"],["#1f0954","#6d5caf"],["#a90308","#ff000d"]]
+  n_template: 10000
 
 
 LOGGER:

@@ -11,7 +11,7 @@ import torch.nn.functional as F
 import wandb
 
 import trainer
-from utils import Vectorize_WSIs
+from utils import Vectorize_WSIs, Handwritten
 
 @trainer.Metric.register("ink")
 class Test_Metric(trainer.Metric):
@@ -30,14 +30,33 @@ class Mnist_Dataset(trainer.Dataset):
 
 
     def get_transforms(self) -> Tuple[Any, Any]:
+        # train_augs = transforms.Compose([
+        #         transforms.Resize(size=(self.IMG_SIZE, self.IMG_SIZE)),
+        #         # transforms.RandAugment(num_ops=self.NUM_OPS),
+        #         # transforms.RandomChoice([
+        #         #     transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
+        #         #     transforms.RandomAutocontrast()]
+        #         #     ),
+        #         # transforms.ColorJitter(brightness=0.3,contrast=0.3),
+        #         # transforms.GaussianBlur(kernel_size=(3, 5), sigma=(0.1, 2)),
+        #         transforms.RandomAutocontrast(),
+        #         transforms.RandomChoice([
+        #             transforms.RandomVerticalFlip(),
+        #             transforms.RandomHorizontalFlip(),
+        #             )]
+        #             ),
+        #         transforms.ToTensor(),
+        #     ])
         train_augs = transforms.Compose([
-                transforms.Resize(size=(self.IMG_SIZE, self.IMG_SIZE)),
-                transforms.RandAugment(num_ops=self.NUM_OPS),
+                transforms.Resize(size=(self.IMG_SIZE,self.IMG_SIZE)),
                 transforms.RandomHorizontalFlip(),
-                transforms.RandomRotation(degrees=(0, 180)),
-                transforms.ToTensor(),
+                transforms.RandomVerticalFlip(),
+                transforms.RandomApply([transforms.RandomRotation(degrees=(0, 180))],p=0.5),
+                transforms.RandomApply([transforms.ColorJitter(brightness=0.3,contrast=0.3)], p=0.6),
+                # transforms.RandomApply([transforms.GaussianBlur(5)],p=0.5),
+                transforms.ToTensor()
             ])
-
+            
         test_augs = transforms.Compose([
                 transforms.Resize(size=(self.IMG_SIZE, self.IMG_SIZE)),
                 transforms.ToTensor(),
@@ -46,12 +65,14 @@ class Mnist_Dataset(trainer.Dataset):
 
     def get_loaders(self):
         
-        image_pth = str(Path(self.path)/"images")
-        mask_pth = str(Path(self.path)/"masks")
+        image_pth = str(Path(self.path)/"104S.tif")
+        mask_pth = str(Path(self.path)/"images")
+
+        template = Handwritten(path=str(Path(self.path).parent / self.kwargs["template_pth"]),n=self.kwargs["n_template"])
 
         trainset = Vectorize_WSIs(image_pth=image_pth,
                                   mask_pth=mask_pth,
-                                  template_pth=self.kwargs["template_pth"],
+                                  handwritten_obj=template,
                                   tile_h=self.kwargs["tile_h"],
                                   tile_w=self.kwargs["tile_w"],
                                   tile_stride_factor_h=self.kwargs["tile_stride_factor_h"],
@@ -63,7 +84,7 @@ class Mnist_Dataset(trainer.Dataset):
         
         testset = Vectorize_WSIs(image_pth=image_pth,
                                   mask_pth=mask_pth,
-                                  template_pth=self.kwargs["template_pth"],
+                                  handwritten_obj=template,
                                   tile_h=self.kwargs["tile_h"],
                                   tile_w=self.kwargs["tile_w"],
                                   tile_stride_factor_h=self.kwargs["tile_stride_factor_h"],
@@ -74,9 +95,10 @@ class Mnist_Dataset(trainer.Dataset):
                                   colors=self.kwargs["colors"])
 
 
-        trainloader = torch.utils.data.DataLoader(trainset, batch_size=self.train_batch_size, num_workers=4,shuffle=True,pin_memory=True)
-        testloader = torch.utils.data.DataLoader(testset, batch_size=self.test_batch_size,shuffle=True, num_workers=4,pin_memory=True)
+        trainloader = torch.utils.data.DataLoader(trainset, batch_size=self.train_batch_size, num_workers=4,shuffle=True,pin_memory=False)
+        testloader = torch.utils.data.DataLoader(testset, batch_size=self.test_batch_size,shuffle=True, num_workers=4,pin_memory=False)
 
+        print("Total patches for training: {}\nTotal patches for testing: {}".format(len(trainset),len(testset)))
         return trainset, trainloader, testset, testloader
 
 
