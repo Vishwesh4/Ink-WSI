@@ -90,9 +90,11 @@ class Vectorize_WSIs(data.Dataset):
         self.mode = mode
         self.colors = colors
         self.train_split = train_split
-        self.all_image_tiles_hr,self.coords = self.tiles_array()
+        self.all_image_tiles_hr = self.tiles_array()
         #For ink stains
-        self.n_templ = 10000
+        # self.n_templ = 10000
+        self.n_templ = 10
+
         self.ink_templates = Handwritten(path=template_pth,
                                          n=self.n_templ
                                         )
@@ -152,13 +154,13 @@ class Vectorize_WSIs(data.Dataset):
         with tqdm(enumerate(sorted(wsipaths))) as t:
 
             all_image_tiles_hr = []
-            all_coords = []
+            # all_coords = []
 
             for wj, wsipath in t:
                 t.set_description('Loading wsis.. {:d}/{:d}'.format(1 + wj, len(wsipaths)))
 
                 'generate tiles for this wsi'
-                image_tiles_hr,coords = self.get_wsi_patches(wsipath)
+                image_tiles_hr = self.get_wsi_patches(wsipath)
 
                 # Check if patches are generated or not for a wsi
                 if len(image_tiles_hr) == 0:
@@ -166,13 +168,13 @@ class Vectorize_WSIs(data.Dataset):
                     continue
                 else:
                     all_image_tiles_hr.append(image_tiles_hr)
-                    all_coords.extend(coords)
+                    # all_coords.extend(coords)
 
 
             # Stack all patches across images
             all_image_tiles_hr = np.concatenate(all_image_tiles_hr)
 
-        return all_image_tiles_hr,all_coords
+        return all_image_tiles_hr
 
     def load_mask(self,wsipth):
         """
@@ -215,12 +217,12 @@ class Vectorize_WSIs(data.Dataset):
 
         patch_id = 0
         image_tiles_hr = []
-        coords = []
+        # coords = []
 
         for ypos in range(sh, ih - 1 - ph, sh):
             for xpos in range(sw, iw - 1 - pw, sw):
                 if self._isforeground(xpos, ypos, mask):  # Select valid foreground patch
-                    coords.append((xpos,ypos))
+                    # coords.append((xpos,ypos))
                     image_tile_hr = self._getpatch(scan, xpos, ypos)
 
                     image_tiles_hr.append(image_tile_hr)
@@ -233,8 +235,8 @@ class Vectorize_WSIs(data.Dataset):
         else:
             image_tiles_hr = np.stack(image_tiles_hr, axis=0).astype('uint8')
 
-        return image_tiles_hr,coords
+        return image_tiles_hr
 
     def _isforeground(self,x,y,mask,threshold=0.95):
         patch = mask[y:y+self.tile_w,x:x+self.tile_w]
-        return np.sum(patch)/float(self.tile_w*self.tile_h)>threshold
+        return (np.sum(patch)/float(self.tile_w*self.tile_h))>threshold

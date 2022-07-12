@@ -22,3 +22,5 @@ from utils.dataloader import *
 from utils.train_funcs import *
 from utils.trainer_code import *
 from utils.inkgeneration import *
+from utils.register import ImageRegister
+from utils.pairwise_patchextractor import Pairwise_Extractor

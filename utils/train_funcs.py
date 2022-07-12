@@ -32,7 +32,10 @@ class Mnist_Dataset(trainer.Dataset):
     def get_transforms(self) -> Tuple[Any, Any]:
         train_augs = transforms.Compose([
                 transforms.Resize(size=(self.IMG_SIZE, self.IMG_SIZE)),
-                transforms.RandAugment(num_ops=self.NUM_OPS),
+                # transforms.RandAugment(num_ops=self.NUM_OPS),
+                transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
+                transforms.RandomAutocontrast(),
+                # transforms.ColorJitter(brightness=0.5),
                 transforms.RandomHorizontalFlip(),
                 transforms.RandomRotation(degrees=(0, 180)),
                 transforms.ToTensor(),
@@ -46,8 +49,8 @@ class Mnist_Dataset(trainer.Dataset):
 
     def get_loaders(self):
         
-        image_pth = str(Path(self.path)/"images")
-        mask_pth = str(Path(self.path)/"masks")
+        image_pth = str(Path(self.path)/"104S.tif")
+        mask_pth = str(Path(self.path)/"images")
 
         trainset = Vectorize_WSIs(image_pth=image_pth,
                                   mask_pth=mask_pth,
