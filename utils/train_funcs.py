@@ -67,8 +67,11 @@ class Mnist_Dataset(trainer.Dataset):
         
         image_pth = str(Path(self.path)/"104S.tif")
         mask_pth = str(Path(self.path)/"images")
+<<<<<<< HEAD
 
         template = Handwritten(path=str(Path(self.path).parent / self.kwargs["template_pth"]),n=self.kwargs["n_template"])
+=======
+>>>>>>> c8afc121eb80ba763423dee4d02fb2a2d61da17f
 
         trainset = Vectorize_WSIs(image_pth=image_pth,
                                   mask_pth=mask_pth,
