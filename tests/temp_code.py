@@ -26,7 +26,7 @@ import os
 import trainer
 import sys
 sys.path.append("/home/ramanav/projects/rrg-amartel/ramanav/Projects/InkFilter")
-import utils
+from modules.train_filter import *
 from pathlib import Path
 
 parent_path = Path("/localscratch")

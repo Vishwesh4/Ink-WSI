@@ -3,7 +3,7 @@ import sys
 from matplotlib import pyplot as plt
 
 sys.path.append("/home/vishwesh/Projects/Ink-WSI")
-from utils import Pairwise_Extractor
+from modules.register import Pairwise_Extractor
 import time
 
 

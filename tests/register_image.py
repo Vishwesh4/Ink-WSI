@@ -8,7 +8,7 @@ import numpy as np
 import openslide
 
 sys.path.append("/home/vishwesh/Projects/Ink-WSI")
-from utils import ImageRegister
+from modules.register import ImageRegister
 
 def get_homography(src_img:np.array,
                    dest_img:np.array,

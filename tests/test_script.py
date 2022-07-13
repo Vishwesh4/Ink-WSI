@@ -3,14 +3,12 @@ import trainer
 import sys
 
 sys.path.append("/home/ramanav/projects/rrg-amartel/ramanav/Projects/InkFilter")
-import utils
 from pathlib import Path
 import torch
 import random
 import numpy as np
 
-from utils.inkgeneration import InkGenerator
-from utils import Handwritten
+from modules.train_filter import *
 from matplotlib import pyplot as plt
 
 # parent_path = Path("/localscratch")

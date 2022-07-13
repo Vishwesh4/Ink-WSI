@@ -5,7 +5,7 @@ import openslide
 import numpy as np
 from matplotlib import pyplot as plt
 
-from utils import ImageRegister
+from .register import ImageRegister
 
 class Pairwise_Extractor:
     THRESHOLD = 50

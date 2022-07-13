@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 sys.path.append("/home/vishwesh/Projects/Ink-WSI")
-from utils import ImageRegister
+from modules.register import ImageRegister
 
 #Read images
 orig_image = cv2.imread("/home/vishwesh/Projects/Ink-WSI/images/1.jpg")

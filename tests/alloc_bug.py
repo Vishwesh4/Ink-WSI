@@ -9,8 +9,7 @@ import random
 import numpy as np
 from tqdm import tqdm
 
-import utils
-from utils.inkgeneration import InkGenerator
+from modules.train_filter import *
 import trainer
 
 random_seed = 2022

@@ -11,7 +11,7 @@ import torch.nn.functional as F
 import wandb
 
 import trainer
-from utils import Vectorize_WSIs, Handwritten
+from .dataloader import Vectorize_WSIs, Handwritten
 
 @trainer.Metric.register("ink")
 class Test_Metric(trainer.Metric):
@@ -30,23 +30,7 @@ class Mnist_Dataset(trainer.Dataset):
 
 
     def get_transforms(self) -> Tuple[Any, Any]:
-        # train_augs = transforms.Compose([
-        #         transforms.Resize(size=(self.IMG_SIZE, self.IMG_SIZE)),
-        #         # transforms.RandAugment(num_ops=self.NUM_OPS),
-        #         # transforms.RandomChoice([
-        #         #     transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
-        #         #     transforms.RandomAutocontrast()]
-        #         #     ),
-        #         # transforms.ColorJitter(brightness=0.3,contrast=0.3),
-        #         # transforms.GaussianBlur(kernel_size=(3, 5), sigma=(0.1, 2)),
-        #         transforms.RandomAutocontrast(),
-        #         transforms.RandomChoice([
-        #             transforms.RandomVerticalFlip(),
-        #             transforms.RandomHorizontalFlip(),
-        #             )]
-        #             ),
-        #         transforms.ToTensor(),
-        #     ])
+
         train_augs = transforms.Compose([
                 transforms.Resize(size=(self.IMG_SIZE,self.IMG_SIZE)),
                 transforms.RandomHorizontalFlip(),
@@ -67,11 +51,8 @@ class Mnist_Dataset(trainer.Dataset):
         
         image_pth = str(Path(self.path)/"104S.tif")
         mask_pth = str(Path(self.path)/"images")
-<<<<<<< HEAD
 
         template = Handwritten(path=str(Path(self.path).parent / self.kwargs["template_pth"]),n=self.kwargs["n_template"])
-=======
->>>>>>> c8afc121eb80ba763423dee4d02fb2a2d61da17f
 
         trainset = Vectorize_WSIs(image_pth=image_pth,
                                   mask_pth=mask_pth,

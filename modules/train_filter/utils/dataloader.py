@@ -14,7 +14,7 @@ from PIL import Image
 import cv2
 import random
 
-from utils.inkgeneration import InkGenerator
+from .inkgeneration import InkGenerator
 
 
 class Handwritten(data.Dataset):
