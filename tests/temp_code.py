@@ -22,29 +22,51 @@
 
 # print("Something")
 
-import os
-import trainer
+# import os
+# import trainer
+# import sys
+# sys.path.append("/home/ramanav/projects/rrg-amartel/ramanav/Projects/InkFilter")
+# from modules.train_filter import *
+# from pathlib import Path
+
+# parent_path = Path("/localscratch")
+# imgs_path = parent_path / Path([p for p in os.listdir(parent_path) if "ramanav" in p ][0]) / "SSL_training"
+
+# dataset = trainer.Dataset.create("ink",
+#                                  path=str(imgs_path),
+#                                  test_batch_size=64,
+#                                  train_batch_size=64,
+#                                 image_pth=str(imgs_path / "images/122S.tif"),
+#                                 mask_pth=str(imgs_path / "masks"),
+#                                 template_pth=str(imgs_path.parent/"by_class"),
+#                                 tile_h=256,
+#                                 tile_w=256,
+#                                 tile_stride_factor_h=3,
+#                                 tile_stride_factor_w=3,
+#                                 colors=[("black","#28282B"),("#002d04","#2a7e19"),("#000133","skyblue"),("#1f0954","#6d5caf"),("#a90308","#ff000d")],
+#                                 train_split=0.8
+# )
+
+# print("Something")
+
+
 import sys
-sys.path.append("/home/ramanav/projects/rrg-amartel/ramanav/Projects/InkFilter")
-from modules.train_filter import *
-from pathlib import Path
-
-parent_path = Path("/localscratch")
-imgs_path = parent_path / Path([p for p in os.listdir(parent_path) if "ramanav" in p ][0]) / "SSL_training"
-
-dataset = trainer.Dataset.create("ink",
-                                 path=str(imgs_path),
-                                 test_batch_size=64,
-                                 train_batch_size=64,
-                                image_pth=str(imgs_path / "images/122S.tif"),
-                                mask_pth=str(imgs_path / "masks"),
-                                template_pth=str(imgs_path.parent/"by_class"),
-                                tile_h=256,
-                                tile_w=256,
-                                tile_stride_factor_h=3,
-                                tile_stride_factor_w=3,
-                                colors=[("black","#28282B"),("#002d04","#2a7e19"),("#000133","skyblue"),("#1f0954","#6d5caf"),("#a90308","#ff000d")],
-                                train_split=0.8
+sys.path.append("/home/ramanav/Projects/Ink-WSI")
+from modules.deploy import ExtractPatches
+image_pth = "/labs3/amartel_data3/tiger_dataset/tiger-training-data/wsitils/images/104S.tif"
+mask_pth = "/labs3/amartel_data3/tiger_dataset/tiger-training-data/wsitils/tissue-masks"
+dataset = ExtractPatches(
+        image_pth=image_pth,
+        tile_h=256,
+        tile_w=256,
+        tile_stride_factor_h=1,
+        tile_stride_factor_w=1,
+        spacing=None,
+        mask_pth=mask_pth,
+        lwst_level_idx=0,
+        mode="train",
+        train_split=1,
+        transform=None
 )
 
-print("Something")
+print(len(dataset))

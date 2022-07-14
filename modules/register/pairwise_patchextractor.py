@@ -73,8 +73,8 @@ class Pairwise_Extractor:
         dest_dimension = self.dest_slide.dimensions
 
         #Extract thumbnail from given slide
-        src_thumb = np.asarray(self.src_slide.get_thumbnail((2000,2000)).convert("RGB"))
-        dest_thumb = np.asarray(self.dest_slide.get_thumbnail((2000,2000)).convert("RGB"))
+        src_thumb = np.asarray(self.src_slide.get_thumbnail((3000,3000)).convert("RGB"))
+        dest_thumb = np.asarray(self.dest_slide.get_thumbnail((3000,3000)).convert("RGB"))
 
         #Get the scaling for getting M
         src_scaling = np.array([
@@ -100,12 +100,10 @@ class Pairwise_Extractor:
                 dest_x:int,
                 dest_y:int,
                 size:Tuple[int,int]=(256,256),
-                )->Tuple[np.array,np.array]:
+                )->Tuple[np.array,np.array,np.array]:
         """
         Given parameters extracts patchs from source and destication slide, co-registered
-        """
-        dest_patch = np.asarray(self.dest_slide.read_region((dest_x,dest_y),0,size).convert("RGB"))
-        
+        """        
         #Step 1: Inverse projection, get coordinates in no ink coordinate system
         four_box = [(dest_x, dest_y),
                     (dest_x + size[0], dest_y),
@@ -122,10 +120,20 @@ class Pairwise_Extractor:
         x_mod,y_mod = x_corner-self.THRESHOLD, y_corner-self.THRESHOLD
         new_src_size = (h+2*self.THRESHOLD,w+2*self.THRESHOLD)
 
+        src_dimension = self.src_slide.dimensions
+        #Check corner case
+        if (x_mod>=src_dimension[0]) or ( (x_mod+new_src_size[1])>=src_dimension[0]) or (y_mod>=src_dimension[1]) or (y_mod+new_src_size[0]>=src_dimension[1]):
+            return None, None, None  
+        
+        dest_patch = np.asarray(self.dest_slide.read_region((dest_x,dest_y),
+                                                            0,
+                                                            size
+                                                            ).convert("RGB"))
+        
         src_patch = np.asarray(self.src_slide.read_region((x_mod,y_mod),
-                                                     0,
-                                                     new_src_size,
-                                                    ).convert("RGB"))
+                                                          0,
+                                                          new_src_size,
+                                                         ).convert("RGB"))
 
         # M_new,paired_img = self.get_homography(src_patch,dest_patch)
         M_new = self.find_new_homography(src_corner=(x_mod,y_mod),dest_corner=(dest_x,dest_y),src_size=new_src_size,M=self.M)

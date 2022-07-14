@@ -1,1 +1,1 @@
-from . import register, train_filter
+from . import register, train_filter, deploy
