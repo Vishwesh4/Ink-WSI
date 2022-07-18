@@ -14,7 +14,7 @@ class Labels:
     def __init__(
         self,
         labels:List[Dict],
-    ):
+    )->None:
         self.labels = labels
         #Initialize all the keys
         for key in self.labels[0].keys():
@@ -22,18 +22,18 @@ class Labels:
         
         self._populate_fields()
 
-    def _populate_fields(self):
+    def _populate_fields(self)->None:
         for i in range(len(self.labels)):
             for key,value in self.labels[i].items():
                 getattr(self,key)[i] = self._tolower(value)
 
-    def get_field(self,key:str):
+    def get_field(self,key:str)->Dict:
         """
         Fetches field given attribute key
         """
         return getattr(self,key)
 
-    def get_label(self,key:str,value:Any):
+    def get_label(self,key:str,value:Any)->Dict:
         """
         Given a key and value fetches label
         """
@@ -46,7 +46,7 @@ class Labels:
              label[key] = getattr(self,key)[label_key]
         return label
     
-    def modify_label(self,pairs:Dict,field_key:str,field_value:str):
+    def modify_label(self,pairs:Dict,field_key:str,field_value:str)->None:
         """
         Based on input dictionary with key and value, changes the current key with new key
         Mainly for modifiying class label based on class name. Default class label is index+1
@@ -64,13 +64,19 @@ class Labels:
             getattr(self,field_key)[current_key] =  self._tolower(keys)
     
     @staticmethod
-    def _tolower(value:Any):
+    def _tolower(value:Any)->Union[int,str]:
         if isinstance(value,str):
             value = value.lower()
         return value
 
+    def __str__(self) -> str:
+        result = ""
+        for key in self.labels[0].keys():
+            result +=  key + ": " +  str(list(getattr(self,key,{}).values())) + "\n"
+        return result
+
 class Annotation:
-    def __init__(self, type: Union[Point,Polygon], index: int, label: Labels, coordinates:np.array, **geo_kwargs):
+    def __init__(self, type: Union[Point,Polygon], index: int, label: Labels, coordinates:np.array, **geo_kwargs)->None:
         self._type = type
         self._index = index
         self._label = label
@@ -116,9 +122,8 @@ class Annotation:
     def __hash__(self):
         return hash(str(self))
 
-    def __eq__(self, other):
+    def __eq__(self, other)->bool:
         return (
-            self.index == other.index
-            and self.coordinates == other.coordinates
-            and self.label == other.label
+            (self.geometry == other.geometry)
+            and (self.label == other.label)
         )

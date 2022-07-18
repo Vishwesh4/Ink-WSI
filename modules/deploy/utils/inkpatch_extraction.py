@@ -10,7 +10,7 @@ from tqdm import tqdm
 from pathlib import Path
 
 from ...register import Pairwise_Extractor
-from .process_wsi import ExtractPatches
+from ...patch_extraction import ExtractPatches
 
 
 class Pairwise_ExtractPatches(ExtractPatches):

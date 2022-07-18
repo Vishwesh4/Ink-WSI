@@ -3,7 +3,7 @@ import os
 from os.path import exists
 import glob
 import random
-sys.path.append("/amartel_data4/temp/lukasz_test/blur/")
+import warnings
 
 import cv2
 import numpy as np
@@ -14,8 +14,11 @@ from PIL import Image
 from skimage import io
 from pathlib import Path
 
-from dptools.slides.processing.wsimask import WSIMask
-
+try:
+    sys.path.append("/amartel_data4/temp/lukasz_test/blur/")
+    from dptools.slides.processing.wsimask import WSIMask
+except:
+    warnings.warn("Tissue extraction code not found, please use some other package or provide with a tissue mask")
 
 class ExtractPatches(Dataset):
     """
@@ -39,7 +42,8 @@ class ExtractPatches(Dataset):
         mode="train",
         train_split=0.8,
         threshold=0.7,
-        transform=None
+        transform=None,
+        **kwargs
     ):
 
         """
@@ -70,6 +74,9 @@ class ExtractPatches(Dataset):
         self.mode = mode
         self.train_split = train_split
         self.threshold = threshold
+
+        for key,value in kwargs.items():
+            setattr(self,key,value)
 
         #Get all mask paths if applicable
         if self.mask_path is not None:

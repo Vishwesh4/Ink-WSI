@@ -11,9 +11,13 @@ from shapely.geometry import Point, Polygon
 from .sedeen_helpers import Labels, Annotation
 
 class SedeenAnnotationParser:
-
-    ANNULAR_LABEL = "#00ff00ff"
-    HOLLOW_LABEL = {"name":"Rest","value":0,"color":ANNULAR_LABEL}
+    """
+    Class defined for handling annotations defined by Sedeen Viewer. The class converts the annotation to shapely objects 
+    and handles the given labels by parsing xml files.
+    The class handles annular annotations. However, to avoid lengthy computations, it is expected that the user will provide
+    color used for Annular annotations.
+    The class doesn't handle pointset well and filters them out
+    """
     TYPES = {
         "polygon": Polygon,
         "rectangle": Polygon,
@@ -24,15 +28,18 @@ class SedeenAnnotationParser:
         "polyline": Polygon
     }
 
-    def __init__(self, renamed_label:Dict=None) -> None:
+    def __init__(self, renamed_label:Dict=None, annular_color:str=None) -> None:
         """
         Parameters:
             renamed_label: For assigning class names to different colors, to be input as {'color1':'name1'}
+            annular_color: Color which is associated with annular annotations
         """
         self._renamed_label = renamed_label
+        
+        self.annular_label = annular_color
+        self.hollow_label = {"name":"rest","value":0,"color":self.annular_label}
 
-    @staticmethod
-    def get_available_labels(open_annotations):
+    def get_available_labels(self,open_annotations):
         labels = []
         for child in open_annotations:
             if (child.tag == "graphic") & (child.attrib.get("type")!="text"):
@@ -46,7 +53,12 @@ class SedeenAnnotationParser:
             name = labels[i]
             labels_construct.append({"name":name,"value":i+1,"color":labels[i]})
         
-        return Labels(labels_construct)
+        
+        
+        labels_final = Labels(labels_construct)
+        labels_final = self._modify_labelset(labels_final)
+
+        return labels_final
 
     def _get_label(self, child, labels: Labels, type):
         name = self._get_label_name(child, labels, type)
@@ -117,7 +129,7 @@ class SedeenAnnotationParser:
                     annotations[idx_j] = self._create_new_annotation(index = idx_j,
                                                                     type = annotations[idx_j].type,
                                                                     coords = annotations[idx_j].coordinates,
-                                                                    label = SedeenAnnotationParser.HOLLOW_LABEL)
+                                                                    label = self.hollow_label)
                     break  
         return annotations            
 
@@ -132,7 +144,6 @@ class SedeenAnnotationParser:
                     break
 
         labels = self.get_available_labels(open_annot)
-        labels = self._modify_labelset(labels)
 
         for child in open_annot:
             if (child.tag == "graphic") & (child.attrib.get("type")!="text"):
@@ -155,6 +166,7 @@ class SedeenAnnotationParser:
             raise FileNotFoundError(path)
 
         annotations = []
+        ann_objects = []
         annular_index = []
         index = 0
         for annotation in self._parse(path):
@@ -164,9 +176,10 @@ class SedeenAnnotationParser:
             label_name = annotation["label"]
             temp_annotation = Annotation(**annotation)
             #necessary step due to number of repeated annotations
-            if temp_annotation not in annotations:
+            ann_objects.append(temp_annotation)
+            if (not (isinstance(temp_annotation.type,Point))) and (temp_annotation.geometry.area!=0) and (temp_annotation not in annotations):
                 annotations.append(temp_annotation)
-                if label_name["color"] == SedeenAnnotationParser.ANNULAR_LABEL:
+                if label_name["color"] == self.annular_label:
                     annular_index.append(index)
                 index+=1
 
