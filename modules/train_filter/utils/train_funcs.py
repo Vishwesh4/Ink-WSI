@@ -36,7 +36,7 @@ class Mnist_Dataset(trainer.Dataset):
                 transforms.RandomHorizontalFlip(),
                 transforms.RandomVerticalFlip(),
                 transforms.RandomApply([transforms.RandomRotation(degrees=(0, 180))],p=0.5),
-                transforms.RandomApply([transforms.ColorJitter(brightness=0.3,contrast=0.3)], p=0.6),
+                # transforms.RandomApply([transforms.ColorJitter(brightness=0.3,contrast=0.3)], p=0.6),
                 # transforms.RandomApply([transforms.GaussianBlur(5)],p=0.5),
                 transforms.ToTensor()
             ])
@@ -49,8 +49,8 @@ class Mnist_Dataset(trainer.Dataset):
 
     def get_loaders(self):
         
-        image_pth = str(Path(self.path)/"104S.tif")
-        mask_pth = str(Path(self.path)/"images")
+        image_pth = str(Path(self.path)/"images")
+        mask_pth = str(Path(self.path)/"masks")
 
         template = Handwritten(path=str(Path(self.path).parent / self.kwargs["template_pth"]),n=self.kwargs["n_template"])
 

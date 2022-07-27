@@ -1,6 +1,6 @@
 ENGINE: #For this section ensure none of the keys are missing
   epochs: 150
-  save_loc: /home/ramanav/projects/rrg-amartel/ramanav/Projects/InkFilter  #Empty save loc indicates no save location
+  save_loc: /home/ramanav/projects/rrg-amartel/Digital_Pathology/Public_Datasets/tiger-training-data  #Empty save loc indicates no save location
   resume_loc: #Empty resume loc indicates no need to resume
   transfer_loc: 
   save_freq: 20
@@ -27,15 +27,15 @@ DATASET:
   tile_stride_factor_h: 7
   train_split: 0.85
   template_pth: "by_class" #For ink 
-  colors: [["black","#28282B"],["#002d04","#2a7e19"],["#000133","skyblue"],["#1f0954","#6d5caf"],["#a90308","#ff000d"]]
+  colors: [["black","#28282B"],["#002d04","#2a7e19"],["#000133","skyblue"],["#1f0954","#6d5caf"],["#a90308","#ff000d"],["#005558","#90DCD5"],["#001769","#005CC9"],["#3C1C16","#A05745"]]
   n_template: 10000
 
 
 LOGGER:
   subclass_name: ink
   project_name: ink-filter
-  run_name: ink_filter
-  notes: ink filter trained on tiger dataset
+  run_name: ink_more_color_v2
+  notes: ink filter trained on tiger dataset, added more colors
 
 LOSS:
   module_name: torch.nn
