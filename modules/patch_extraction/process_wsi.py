@@ -157,16 +157,16 @@ class ExtractPatches(Dataset):
             if self.output_path is not None:
                 tissue_mask.save_png(str(Path(self.output_path) / "mask_image.png"))
             mask_pil = Image.fromarray(255 * tissue_mask.array.T)
-            mask_processed = openslide.ImageSlide(mask_pil)
+            mask = openslide.ImageSlide(mask_pil)
         else:
             filename, file_extension = os.path.splitext(Path(wsipth).name)
             indv_mask_pth = list(filter(lambda x: filename in str(x),self.all_masks))
             mask = io.imread(str(indv_mask_pth[0]))
-            mask = Image.fromarray(mask).convert("RGB")
-            mask_processed = openslide.ImageSlide(mask)
-            del mask
+            # mask = Image.fromarray(mask).convert("RGB")
+            # mask_processed = openslide.ImageSlide(mask)
+            # del mask
 
-        return mask_processed
+        return mask
 
     def _getpatch(self, scan, x, y):
 
@@ -229,7 +229,8 @@ class ExtractPatches(Dataset):
         sh, sw = self.tile_stride_h, self.tile_stride_w
         ph, pw = self.tile_h, self.tile_w
 
-        self.mask_factor = np.array(scan.dimensions) / np.array(mask.dimensions)
+        if self.mask_path is None:
+            self.mask_factor = np.array(scan.dimensions) / np.array(mask.dimensions)
 
         patch_id = 0
         image_tiles_hr = []
@@ -260,12 +261,17 @@ class ExtractPatches(Dataset):
         return image_tiles_hr, template
 
     def _isforeground(self, coords, mask):
-        coords_resize = (coords / self.mask_factor).astype(int)
-        dim_resize = tuple(([self.tile_w, self.tile_h] / self.mask_factor).astype(int))
-        patch = np.array(mask.read_region(coords_resize, self.hr_level, dim_resize).convert("L"))
-        if np.max(patch)>1:
-            max_val = 255
+        if self.mask_path is None:
+            coords_resize = (coords / self.mask_factor).astype(int)
+            dim_resize = tuple(([self.tile_w, self.tile_h] / self.mask_factor).astype(int))
+            patch = np.array(mask.read_region(coords_resize, self.hr_level, dim_resize).convert("L"))
+            if np.max(patch)>1:
+                max_val = 255
+            else:
+                max_val = 1
+            perc = np.sum((np.array(patch) / max_val)) / (dim_resize[0] * dim_resize[1])
+            return perc >= self.threshold
         else:
-            max_val = 1
-        perc = np.sum((np.array(patch) / max_val)) / (dim_resize[0] * dim_resize[1])
-        return perc >= self.threshold
+            x,y = coords
+            patch = mask[y:y+self.tile_w,x:x+self.tile_w]
+            return (np.sum(patch)/float(self.tile_w*self.tile_h))>=self.threshold
