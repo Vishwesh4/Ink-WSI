@@ -43,6 +43,7 @@ class ExtractPatches(Dataset):
         train_split=0.8,
         threshold=0.7,
         transform=None,
+        get_template=False,
         **kwargs
     ):
 
@@ -74,6 +75,7 @@ class ExtractPatches(Dataset):
         self.mode = mode
         self.train_split = train_split
         self.threshold = threshold
+        self.get_template = get_template
 
         for key,value in kwargs.items():
             setattr(self,key,value)
@@ -84,6 +86,7 @@ class ExtractPatches(Dataset):
             if temppth.is_dir():
                 self.all_masks = list(temppth.glob("*"))
             else:
+                print(f"Found {len(self.all_masks)} masks")
                 self.all_masks = list(self.mask_path)
 
         #Load all extracted patches into RAM
@@ -142,7 +145,7 @@ class ExtractPatches(Dataset):
             # Stack all patches across images
             all_image_tiles_hr = np.concatenate(all_image_tiles_hr)
 
-        if self.output_path is not None:
+        if self.get_template and (self.output_path is not None):
             cv2.imwrite(str(Path(self.output_path) / "template.png"), 255 * (template > 0))
         
         return all_image_tiles_hr, template
@@ -230,7 +233,10 @@ class ExtractPatches(Dataset):
 
         patch_id = 0
         image_tiles_hr = []
-        template = np.zeros(shape=((ih-1-ph-sh)//sh + 1, (iw-1-pw-sw)//sw + 1), dtype=np.float32)
+        if self.get_template:
+            template = np.zeros(shape=((ih-1-ph-sh)//sh + 1, (iw-1-pw-sw)//sw + 1), dtype=np.float32)
+        else:
+            template = None
 
         for y,ypos in enumerate(range(sh, ih - 1 - ph, sh)):
             for x,xpos in enumerate(range(sw, iw - 1 - pw, sw)):
@@ -241,8 +247,9 @@ class ExtractPatches(Dataset):
                     image_tiles_hr.append(image_tile_hr)
 
                     patch_id = patch_id + 1
-                    #Template filling
-                    template[y,x] =  patch_id
+                    if self.get_template:
+                        #Template filling
+                        template[y,x] =  patch_id
         
         # Concatenate
         if len(image_tiles_hr) == 0:

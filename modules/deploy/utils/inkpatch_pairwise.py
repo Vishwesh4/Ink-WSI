@@ -2,59 +2,90 @@ import glob
 import random
 from os.path import exists
 from typing import Tuple
+import os
 
 import cv2
 import torchvision
 import numpy as np
 from tqdm import tqdm
 from pathlib import Path
+from shapely.geometry import Point
 
-from ...register import Pairwise_Extractor
 from ...patch_extraction import ExtractPatches
+from ...patch_extraction import SedeenAnnotationParser
+from .inkpatch_extraction import Pairwise_ExtractPatches, Pairwise_Extractor
 
-
-class Pairwise_ExtractPatches(ExtractPatches):
+class Pairwise_ExtractAnnot(Pairwise_ExtractPatches):
     def __init__(self,
+                pair_pths,
+                annotation_dir,
+                renamed_label:dict,
+                tile_h,
+                tile_w,
+                tile_stride_factor_h, 
+                tile_stride_factor_w, 
+                spacing=None, 
+                mask_pth=None, 
+                output_pth=None, 
+                lwst_level_idx=0, 
+                mode="train", 
+                train_split=0.8, 
+                threshold=0.7, 
+                transform=None,
+                sample_threshold:int=80,
+                get_template=False):
+        
+        self.annotation_parser = SedeenAnnotationParser(renamed_label)
+
+        self.all_xmls = Path(annotation_dir).glob("*.xml")
+        self.sample_threshold = sample_threshold
+
+        super().__init__(
                  pair_pths,
                  tile_h,
                  tile_w,
                  tile_stride_factor_h, 
                  tile_stride_factor_w, 
-                 spacing=None, 
-                 mask_pth=None, 
-                 output_pth=None, 
-                 lwst_level_idx=0, 
-                 mode="train", 
-                 train_split=0.8, 
-                 threshold=0.7, 
-                 transform=None,
-                 get_template=False):
-        """
-        Based on given pair of paths, registers the pairs, and extracts patchs at both the slides in the same location
-        Parameters:
-            pair_pths (List[Tuple[str,str]]): List of pairs of tuples containing paths of src and destination slide
-        """
-        super().__init__(pair_pths, 
-                         tile_h, 
-                         tile_w, 
-                         tile_stride_factor_h, 
-                         tile_stride_factor_w, 
-                         spacing, 
-                         mask_pth, 
-                         output_pth, 
-                         lwst_level_idx, 
-                         mode, 
-                         train_split, 
-                         threshold, 
-                         transform,
-                         get_template)
+                 spacing, 
+                 mask_pth, 
+                 output_pth, 
+                 lwst_level_idx, 
+                 mode, 
+                 train_split, 
+                 threshold, 
+                 transform,
+                 get_template
+                 )
 
     def __getitem__(self, index):
         dest_img, src_img = self.all_image_tiles_hr[index]
+        label = self.all_labels[index]
+
         if self.transform is not None:
-            return self.transform(dest_img), self.transform(src_img)
+            return self.transform(dest_img), self.transform(src_img), label
         else:
-            return dest_img, src_img
+            return dest_img, src_img, label
+    
+    
+    def _get_annotations(self, wsipth):
+        """
+        Gets annotations in xml format based on the slide. Assumes the xml file shares the same name as the name 
+        in wsipth
+        """
+        filename, file_extension = os.path.splitext(Path(wsipth).name)
+        indv_annot_pth = list(filter(lambda x: filename in str(x),self.all_xmls))
+        annoations = self.annotation_parser.parse(str(indv_annot_pth[0]))
+        return annoations
+        
+    def _in_annotation(self,coords,annotations):
+        """
+        Determines if a point lies inside any of the annotations
+        """
+        temp_point = Point(*coords)
+        for annots in annotations:
+            if annots.geometry.buffer(-self.sample_threshold).contains(temp_point):
+                return True, annots
+        return False, None
 
     def tiles_array(self):
         # Check image
@@ -77,6 +108,7 @@ class Pairwise_ExtractPatches(ExtractPatches):
         with tqdm(enumerate(sorted(wsipaths))) as t:
 
             all_image_tiles_hr = []
+            all_labels = []
 
             for wj, wsipath in t:
                 t.set_description(
@@ -84,7 +116,7 @@ class Pairwise_ExtractPatches(ExtractPatches):
                 )
                 
                 "generate tiles for this wsi"
-                image_tiles_hr, template = self.get_wsi_patches(wsipath)
+                image_tiles_hr, template, labels = self.get_wsi_patches(wsipath)
 
                 # Check if patches are generated or not for a wsi
                 if len(image_tiles_hr) == 0:
@@ -92,12 +124,15 @@ class Pairwise_ExtractPatches(ExtractPatches):
                     continue
                 else:
                     all_image_tiles_hr.append(image_tiles_hr)
+                    all_labels.extend(labels)
 
             # Stack all patches across images
             all_image_tiles_hr = np.concatenate(all_image_tiles_hr)
 
         if self.get_template and (self.output_path is not None):
             cv2.imwrite(str(Path(self.output_path) / "template.png"), 255 * (template > 0))
+        
+        self.all_labels = np.array(all_labels)
         
         return all_image_tiles_hr, template
 
@@ -116,10 +151,13 @@ class Pairwise_ExtractPatches(ExtractPatches):
         "read the wsi scan"
         src_slide_pth, dest_slide_pth = wsipth
         #Perform registration
-        patch_extractor = Pairwise_Extractor.from_path(src_path=src_slide_pth, dest_path=dest_slide_pth)       
+        patch_extractor = Pairwise_Extractor.from_path(src_path=src_slide_pth, dest_path=dest_slide_pth)
+        
+        annotations = self._get_annotations(dest_slide_pth)
+
         
         #Get the mask from dest_slide
-        mask = self._get_mask(dest_slide_pth)
+        # mask = self._get_mask(dest_slide_pth)
         
         #Get the mask from src slide and warp it to dest_slide
         # mask = self._get_mask(src_slide_pth)
@@ -138,11 +176,11 @@ class Pairwise_ExtractPatches(ExtractPatches):
         sh, sw = self.tile_stride_h, self.tile_stride_w
         ph, pw = self.tile_h, self.tile_w
 
-        self.mask_factor = np.array(patch_extractor.dest_slide.dimensions) / np.array(mask.dimensions)
+        # self.mask_factor = np.array(patch_extractor.dest_slide.dimensions) / np.array(mask.dimensions)
 
         patch_id = 0
         image_tiles_hr = []
-        
+        labels = []
         if self.get_template:
             template = np.zeros(shape=((ih-1-ph-sh)//sh + 1, (iw-1-pw-sw)//sw + 1), dtype=np.float32)
         else:
@@ -150,7 +188,9 @@ class Pairwise_ExtractPatches(ExtractPatches):
 
         for y,ypos in enumerate(range(sh, ih - 1 - ph, sh)):
             for x,xpos in enumerate(range(sw, iw - 1 - pw, sw)):
-                if self._isforeground((xpos, ypos), mask):  # Select valid foreground patch
+                inside, annot = self._in_annotation((xpos,ypos),annotations)
+                if inside:
+                # if self._isforeground((xpos, ypos), mask):  # Select valid foreground patch
                     # coords.append((xpos,ypos))
                     image_tile_dest,_,image_tile_src = patch_extractor.extract(xpos,ypos,(pw,ph))
 
@@ -158,6 +198,7 @@ class Pairwise_ExtractPatches(ExtractPatches):
                         continue
                     
                     image_tiles_hr.append(np.stack((image_tile_dest,image_tile_src)))
+                    labels.append(annot.label["value"] - 1)
 
                     patch_id = patch_id + 1
                     
@@ -171,4 +212,4 @@ class Pairwise_ExtractPatches(ExtractPatches):
         else:
             image_tiles_hr = np.stack(image_tiles_hr, axis=0).astype("uint8")
 
-        return image_tiles_hr, template
+        return image_tiles_hr, template, labels

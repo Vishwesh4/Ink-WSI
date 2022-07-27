@@ -47,11 +47,13 @@ class ExtractAnnotations(ExtractPatches):
                  train_split=0.8, 
                  threshold=0.7, 
                  transform=None,
-                 sample_threshold:int=80):
+                 sample_threshold:int=80,
+                 get_template=False):
         
         self.annotation_parser = SedeenAnnotationParser(renamed_label)
 
         self.all_xmls = Path(annotation_dir).glob("*.xml")
+        self.sample_threshold = sample_threshold
 
         super().__init__(image_pth,
                          tile_h, 
@@ -65,7 +67,8 @@ class ExtractAnnotations(ExtractPatches):
                          mode, 
                          train_split, 
                          threshold, 
-                         transform)
+                         transform,
+                         get_template)
 
     def __getitem__(self, index):
         img = self.all_image_tiles_hr[index]
@@ -119,7 +122,7 @@ class ExtractAnnotations(ExtractPatches):
             # Stack all patches across images
             all_image_tiles_hr = np.concatenate(all_image_tiles_hr)
 
-        if self.output_path is not None:
+        if self.get_template and (self.output_path is not None):
             cv2.imwrite(str(Path(self.output_path) / "template.png"), 255 * (template > 0))
         
         self.all_labels = np.array(all_labels)
@@ -150,7 +153,7 @@ class ExtractAnnotations(ExtractPatches):
     def get_wsi_patches(self, wsipth):
         "read the wsi scan"
         scan = self._get_slide(wsipth)
-        mask = self._get_mask(wsipth)
+        # mask = self._get_mask(wsipth)
         annotations = self._get_annotations(wsipth)
 
         "downsample multiplier"
@@ -167,17 +170,21 @@ class ExtractAnnotations(ExtractPatches):
         sh, sw = self.tile_stride_h, self.tile_stride_w
         ph, pw = self.tile_h, self.tile_w
 
-        self.mask_factor = np.array(scan.dimensions) / np.array(mask.dimensions)
+        # self.mask_factor = np.array(scan.dimensions) / np.array(mask.dimensions)
 
         patch_id = 0
         image_tiles_hr = []
         labels = []
-        template = np.zeros(shape=((ih-1-ph-sh)//sh + 1, (iw-1-pw-sw)//sw + 1), dtype=np.float32)
+        if self.get_template:
+            template = np.zeros(shape=((ih-1-ph-sh)//sh + 1, (iw-1-pw-sw)//sw + 1), dtype=np.float32)
+        else:
+            template = None
 
         for y,ypos in enumerate(range(sh, ih - 1 - ph, sh)):
             for x,xpos in enumerate(range(sw, iw - 1 - pw, sw)):
                 inside, annot = self._in_annotation((xpos,ypos),annotations)
-                if inside and self._isforeground((xpos, ypos), mask):  # Select valid foreground patch and from valid annotation
+                # if inside and self._isforeground((xpos, ypos), mask):  # Select valid foreground patch and from valid annotation
+                if inside:
                     # coords.append((xpos,ypos))
                     image_tile_hr = self._getpatch(scan, xpos, ypos)
 
@@ -185,8 +192,10 @@ class ExtractAnnotations(ExtractPatches):
                     labels.append(annot.label["value"] - 1)
                     
                     patch_id = patch_id + 1
-                    #Template filling
-                    template[y,x] =  patch_id
+                    
+                    if self.get_template:
+                        #Template filling
+                        template[y,x] =  patch_id
 
         
         # Concatenate

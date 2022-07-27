@@ -6,3 +6,4 @@ Scripts
 wandb
 images
 tests/Results
+*.pt
