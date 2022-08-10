@@ -55,7 +55,8 @@ class ExtractPatches(Dataset):
             tile_stride_factor_h (int): stride height factor, height will be tile_height * factor
             tile_stride_factor_w (int): stride width factor, width will be tile_width * factor
             spacing(float): Specify this value if you want to extract patches at a given spacing
-            mask_pth(str): Directory where all masks are stored
+            mask_pth(str): Directory where all masks are stored, if none is given then masks are extracted automatically
+            output_pth(str): Directory where all the masks and template if calculated are stored
             mode (str): train or val, split the slides into trainset and val set
             train_split(float): Between 0-1, ratio of split between train and val set
             lwst_level_idx (int): lowest level for patch indexing
@@ -63,7 +64,7 @@ class ExtractPatches(Dataset):
         """
 
         self.image_path = image_pth
-        self.output_path = output_pth
+        self.output_path = Path(output_pth)
         self.spacing = spacing
         self.tile_h = tile_h
         self.tile_w = tile_w
@@ -89,8 +90,16 @@ class ExtractPatches(Dataset):
                 print(f"Found {len(self.all_masks)} masks")
                 self.all_masks = list(self.mask_path)
 
+        if self.output_path is not None:
+            if not (self.output_path/"masks").is_dir():
+                os.mkdir(self.output_path/"masks")
+            if not (self.output_path/"templates").is_dir():
+                os.mkdir(self.output_path/"templates")
+
         #Load all extracted patches into RAM
         self.all_image_tiles_hr, self.template = self.tiles_array()
+
+        print(f"Extracted {len(self.all_image_tiles_hr)} patches")
 
     def __len__(self):
         return len(self.all_image_tiles_hr)
@@ -104,14 +113,21 @@ class ExtractPatches(Dataset):
 
     def tiles_array(self):
 
-        # Check image
-        if not exists(self.image_path):
-            raise Exception("WSI file does not exist in: %s" % str(self.image_path))
         all_wsipaths = []
-        if Path(self.image_path).suffix[1:] in ["tif","svs"]:
-            all_wsipaths.append(self.image_path)
-        for file_ext in ['tif', 'svs']:
-            all_wsipaths = all_wsipaths + glob.glob('{}/*.{}'.format(self.image_path, file_ext))
+        if isinstance(self.image_path,list):
+            #Check if images in list exist
+            for i in range(len(self.image_path)):
+                if not(exists(self.image_path[i])):
+                    raise Exception("WSI file does not exist in: %s" % str(self.image_path[i]))
+            all_wsipaths = self.image_path.copy()
+        else:
+            # Check image
+            if not exists(self.image_path):
+                raise Exception("WSI file does not exist in: %s" % str(self.image_path))
+            if Path(self.image_path).suffix[1:] in ["tif","svs"]:
+                all_wsipaths.append(self.image_path)
+            for file_ext in ['tif', 'svs']:
+                all_wsipaths = all_wsipaths + glob.glob('{}/*.{}'.format(self.image_path, file_ext))
         random.shuffle(all_wsipaths)
         
         #Select subset of slides for training/val setup
@@ -135,6 +151,9 @@ class ExtractPatches(Dataset):
                 "generate tiles for this wsi"
                 image_tiles_hr, template = self.get_wsi_patches(wsipath)
 
+                if self.get_template and (self.output_path is not None):
+                    cv2.imwrite(str(self.output_path / Path("templates") /f"{Path(wsipath).stem}_template.png"), 255 * (template > 0))
+
                 # Check if patches are generated or not for a wsi
                 if len(image_tiles_hr) == 0:
                     print("bad wsi, no patches are generated for", str(wsipath))
@@ -144,18 +163,15 @@ class ExtractPatches(Dataset):
 
             # Stack all patches across images
             all_image_tiles_hr = np.concatenate(all_image_tiles_hr)
-
-        if self.get_template and (self.output_path is not None):
-            cv2.imwrite(str(Path(self.output_path) / "template.png"), 255 * (template > 0))
         
         return all_image_tiles_hr, template
     
     def _get_mask(self, wsipth):
         #If mask path not available, calulates the mask
         if self.mask_path is None:
-            tissue_mask = WSIMask(wsipth, min_size=500, mode="lab", threshold=0.1)
+            tissue_mask = WSIMask(wsipth, min_size=500, mode="lab", threshold=0.1,fill_mask_kernel_size=9)
             if self.output_path is not None:
-                tissue_mask.save_png(str(Path(self.output_path) / "mask_image.png"))
+                tissue_mask.save_png(str(Path(self.output_path) / Path("masks") / f"{Path(wsipth).stem}_mask_image.png"))
             mask_pil = Image.fromarray(255 * tissue_mask.array.T)
             mask = openslide.ImageSlide(mask_pil)
         else:

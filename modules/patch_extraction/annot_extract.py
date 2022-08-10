@@ -52,7 +52,7 @@ class ExtractAnnotations(ExtractPatches):
         
         self.annotation_parser = SedeenAnnotationParser(renamed_label)
 
-        self.all_xmls = Path(annotation_dir).glob("*.xml")
+        self.all_xmls = list(Path(annotation_dir).glob("*.xml"))
         self.sample_threshold = sample_threshold
 
         super().__init__(image_pth,
