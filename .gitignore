@@ -7,3 +7,7 @@ wandb
 images
 tests/Results
 *.pt
+*.out
+*.png
+*.log
+*.txt

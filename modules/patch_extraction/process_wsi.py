@@ -64,7 +64,7 @@ class ExtractPatches(Dataset):
         """
 
         self.image_path = image_pth
-        self.output_path = Path(output_pth)
+        self.output_path = output_pth
         self.spacing = spacing
         self.tile_h = tile_h
         self.tile_w = tile_w
@@ -91,6 +91,7 @@ class ExtractPatches(Dataset):
                 self.all_masks = list(self.mask_path)
 
         if self.output_path is not None:
+            self.output_path = Path(self.output_path)
             if not (self.output_path/"masks").is_dir():
                 os.mkdir(self.output_path/"masks")
             if not (self.output_path/"templates").is_dir():
@@ -171,7 +172,7 @@ class ExtractPatches(Dataset):
         if self.mask_path is None:
             tissue_mask = WSIMask(wsipth, min_size=500, mode="lab", threshold=0.1,fill_mask_kernel_size=9)
             if self.output_path is not None:
-                tissue_mask.save_png(str(Path(self.output_path) / Path("masks") / f"{Path(wsipth).stem}_mask_image.png"))
+                tissue_mask.save_png(str(self.output_path / Path("masks") / f"{Path(wsipth).stem}_mask_image.png"))
             mask_pil = Image.fromarray(255 * tissue_mask.array.T)
             mask = openslide.ImageSlide(mask_pil)
         else:

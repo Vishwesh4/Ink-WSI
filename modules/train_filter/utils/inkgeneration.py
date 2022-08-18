@@ -43,6 +43,8 @@ class InkGenerator:
     #main_process parameters
     TYPE_PROB = [0.5,0.8]
     MASK_THRESH = 0.15
+    #Alpha for opacity
+    ALPHA = [0.5,1]
 
     def __init__(self,ink_template,colors)->None:
         """
@@ -99,7 +101,7 @@ class InkGenerator:
         patch = img_color.copy()
         
         #Generate the fake image by overlaying op top of other
-        alpha=torch.distributions.uniform.Uniform(0.5,1).sample().item()
+        alpha=torch.distributions.uniform.Uniform(InkGenerator.ALPHA[0],InkGenerator.ALPHA[1]).sample().item()
         noise_img = img.copy()/255
         A = np.clip(1-mask,1-alpha,1)
         B = np.clip(mask,0,alpha)
