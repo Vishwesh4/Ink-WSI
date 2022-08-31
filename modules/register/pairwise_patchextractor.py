@@ -136,7 +136,7 @@ class Pairwise_Extractor:
                                                          ).convert("RGB"))
 
         # M_new,paired_img = self.get_homography(src_patch,dest_patch)
-        M_new = self.find_new_homography(src_corner=(x_mod,y_mod),dest_corner=(dest_x,dest_y),src_size=new_src_size,M=self.M)
+        M_new = self.find_new_homography(src_corner=(x_mod,y_mod),dest_corner=(dest_x,dest_y),M=self.M)
         paired_img = cv2.warpPerspective(src_patch, M_new, size)
 
         if self.plot:
@@ -151,20 +151,17 @@ class Pairwise_Extractor:
 
         return dest_patch, src_patch, paired_img    
     
-    def find_new_homography(self, src_corner:np.array, dest_corner:np.array, src_size:Tuple[np.array,np.array], M:np.array):
-        N = 20
-        src_pts = []
-        dst_pts = []
-        for i in range(N):
-            a_x = np.random.randint(low=0, high=src_size[0])
-            b_x = np.random.randint(low=0, high=src_size[1])
-            trans = np.array([a_x,b_x])
-            src_pts.append(trans)
-            src = src_corner + trans
-            dest = self.transform_coords(src[0],src[1],M)
-            dst_pts.append(np.array(dest)-np.array(dest_corner))
-        
-        Mat, mask = cv2.findHomography(np.array(src_pts), np.array(dst_pts), cv2.RANSAC, 5.0)
+    def find_new_homography(self, src_corner:np.array, dest_corner:np.array, M:np.array):
+        """
+        Finds homography for each patch
+        """
+        s1 = src_corner[0]
+        s2 = src_corner[1]
+        t1 = dest_corner[0]
+        t2 = dest_corner[1]
+        Mat = np.array([[M[0,0]-M[2,0]*t1, M[0,1]-M[2,1]*t1, M[0,2]-M[2,2]*t1 + s1*(M[0,0]-M[2,0]*t1) + s2*(M[0,1]-M[2,1]*t1)],
+                        [M[1,0]-M[2,0]*t2, M[1,1]-M[2,1]*t2, M[1,2]-M[2,2]*t2 + s1*(M[1,0]-M[2,0]*t2) + s2*(M[1,1]-M[2,1]*t2)],
+                        [M[2,0], M[2,1], M[2,2] + M[2,0]*s1 + M[2,1]*s2]])
 
         return Mat
 

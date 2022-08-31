@@ -12,24 +12,25 @@ import time
 size_img = (256,256)
 
 #Read slides
-# img_ink_path = "/home/vishwesh/Projects/Ink-WSI/images/121504.svs"
-# img_noink_path = "/home/vishwesh/Projects/Ink-WSI/images/114793.svs"
+img_ink_path = "/home/vishwesh/Projects/Ink-WSI/images/121504.svs"
+img_noink_path = "/home/vishwesh/Projects/Ink-WSI/images/114793.svs"
 
 # #Read region from ink
 # x_point,y_point = (30773, 15864)
 # # x_point,y_point = (28059,21613)
-# # x_point,y_point = (23346,24651)
-# # x_point,y_point = (11367,9926)
-# # x_point,y_point = (19967,14363)
+# x_point,y_point = (23346,24651)
+# x_point,y_point = (11367,9926)
+# x_point,y_point = (19967,14363)
 # x_point,y_point = (46188,11040)
+x_point,y_point = (14349,12345)
 
 
-img_ink_path = "/home/vishwesh/Projects/Ink-WSI/images/121393.svs"
-img_noink_path = "/home/vishwesh/Projects/Ink-WSI/images/114758.svs"
+# img_ink_path = "/home/vishwesh/Projects/Ink-WSI/images/121393.svs"
+# img_noink_path = "/home/vishwesh/Projects/Ink-WSI/images/114758.svs"
 
 #Read region from ink
-x_point,y_point = (53315, 22135)
-x_point,y_point = (49461, 14263)
+# x_point,y_point = (53315, 22135)
+# x_point,y_point = (49461, 14263)
 
 
 patch_extractor = Pairwise_Extractor.from_path(src_path=img_noink_path, dest_path=img_ink_path, plot=True)

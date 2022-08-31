@@ -13,7 +13,7 @@ See our template dataset class 'template_dataset.py' for more details.
 import importlib
 import torch.utils.data
 from data.base_dataset import BaseDataset
-from data.extract_patches import Vectorize_WSIs
+# from data.extract_patches import Vectorize_WSIs
 # from data.utils import main_process,handwritten
 
 

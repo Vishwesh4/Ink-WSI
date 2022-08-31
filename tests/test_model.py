@@ -72,7 +72,7 @@ all_dataset = torch.utils.data.ConcatDataset(dataset_list)
 print(f"Total Length of the dataset: {len(all_dataset)}")
 
 #Ink filter model
-model_path = "/home/ramanav/Projects/Ink-WSI/Results/filter/Checkpoint_27Jul18_05_09_1.00.pt"
+model_path = "/localdisk3/ramanav/Results/Ink_WSI/Ink_filter/Checkpoint_27Jul18_05_09_1.00.pt"
 # model_path = "/home/ramanav/Projects/Ink-WSI/Results/filter/Checkpoint_28Jul12_19_55_1.00.pt"
 device = torch.device("cuda:3")
 model = trainer.Model.create("ink")

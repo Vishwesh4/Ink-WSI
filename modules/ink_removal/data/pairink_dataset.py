@@ -1,6 +1,5 @@
 import os
 import sys
-from xml.sax.handler import property_declaration_handler
 sys.path.append("/home/ramanav/Projects/Ink-WSI")
 
 from pathlib import Path
@@ -24,11 +23,9 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
     @staticmethod
     def modify_commandline_options(parser, is_train):
         """Add new dataset-specific options, and rewrite default values for existing options.
-
         Parameters:
             parser          -- original option parser
             is_train (bool) -- whether training phase or test phase. You can use this flag to add training-specific or test-specific options.
-
         Returns:
             the modified parser.
         """
@@ -52,10 +49,8 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
                  transform=transforms.ToTensor()
                  ):
         """Initialize this dataset class.
-
         Parameters:
             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
-
         A few things can be done here.
         - save the options (have been done in BaseDataset)
         - get image paths and meta information of the dataset.
@@ -98,8 +93,18 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
                                 sample_threshold=50
                                 )
         
-        print(len(self.all_image_tiles_hr))
-        # ExtractPatches.__init__(self,image_pth, tile_h, tile_w, tile_stride_factor_h, tile_stride_factor_w, spacing, mask_pth, output_pth, lwst_level_idx, opt.mode, train_split, threshold, transform)
+        # print("Number of Patches Extracted: {}".format(len(self.all_image_tiles_hr)))
+        all_labels = np.array(self.all_labels)
+        all_labels_1 = np.where(all_labels==1)[0]
+        all_labels_0 = np.where(all_labels==0)[0]
+        np.random.shuffle(all_labels_1)
+        np.random.shuffle(all_labels_0)
+
+        #Get equal number of postive and negative samples for testing
+        self.all_lab_shuff_idx = np.concatenate((all_labels_1[:opt.num_test//2],all_labels_0[:opt.num_test//2]))
+        np.random.shuffle(self.all_lab_shuff_idx)
+        print(f"Length of dataset: {len(self.all_lab_shuff_idx)}")
+	# ExtractPatches.__init__(self,image_pth, tile_h, tile_w, tile_stride_factor_h, tile_stride_factor_w, spacing, mask_pth, output_pth, lwst_level_idx, opt.mode, train_split, threshold, transform)
 
         # save the option and dataset root
         #Basic Transforms
@@ -107,18 +112,16 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
 
     def __getitem__(self, index):
         """Return a data point and its metadata information.
-
         Parameters:
             index -- a random integer for data indexing
-
         Returns:
             a dictionary of data with their names. It usually contains the data itself and its metadata information.
-
         Step 1: get a random image path: e.g., path = self.image_paths[index]
         Step 2: load your data from the disk: e.g., image = Image.open(path).convert('RGB').
         Step 3: convert your data to a PyTorch tensor. You can use helpder functions such as self.transform. e.g., data = self.transform(image)
         Step 4: return a data point as a dictionary.
         """
+        index = self.all_lab_shuff_idx[index]
         ink_img, clean_img = self.all_image_tiles_hr[index]
         label = self.all_labels[index]
         #Get fake images
@@ -146,7 +149,7 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
     
     def __len__(self):
         """Return the total number of images."""
-        return len(self.all_image_tiles_hr)
+        return len(self.all_lab_shuff_idx)
 
     def normalize(self,img):
         if self.do_norm:
@@ -154,7 +157,6 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
         else:
             return img
 
-    @property
-    def labels(self):
-        return self.all_labels
-        
+    # @property
+    # def labels(self):
+    #     return self.all_labels

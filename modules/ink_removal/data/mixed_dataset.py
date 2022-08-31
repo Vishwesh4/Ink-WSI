@@ -19,8 +19,8 @@ from modules.train_filter import InkGenerator
 # from data.extract_patches import Vectorize_WSIs
 from data.base_dataset import BaseDataset, get_transform
 
-class DcisinkDataset(BaseDataset, ExtractPatches):
-    """A template dataset class for you to implement custom datasets."""
+class MixedDataset(BaseDataset, ExtractPatches):
+    """For combining DCIS and Tiger dataset"""
     
     @staticmethod
     def modify_commandline_options(parser, is_train):
@@ -35,8 +35,8 @@ class DcisinkDataset(BaseDataset, ExtractPatches):
         """
         # parser.add_argument('--new_dataset_option', type=float, default=1.0, help='new dataset option')
         parser.add_argument('--mode',type=str,default="train",help="Train/Test")
-        parser.add_argument('--stride_h',type=float,default=5,help="Stride factor with tile size 256 in y direction")
-        parser.add_argument('--stride_w',type=float,default=5,help="Stride factor with tile size 256 in x direction")
+        # parser.add_argument('--stride_h',type=float,default=5,help="Stride factor with tile size 256 in y direction")
+        # parser.add_argument('--stride_w',type=float,default=5,help="Stride factor with tile size 256 in x direction")
 
         if is_train==False:
             parser.set_defaults(mode="test")  # specify dataset-specific default values
@@ -48,8 +48,6 @@ class DcisinkDataset(BaseDataset, ExtractPatches):
                  tile_h=256, 
                  tile_w=256, 
                  lwst_level_idx=0,
-                 train_split=1, 
-                 threshold=0.7, 
                  transform=transforms.ToTensor()
                  ):
         """Initialize this dataset class.
@@ -70,7 +68,7 @@ class DcisinkDataset(BaseDataset, ExtractPatches):
         # image_pth = str(Path(image_pth) / "images")
         
         # self.colors = [["black","#28282B"],["#002d04","#2a7e19"],["#000133","skyblue"],["#1f0954","#6d5caf"],["#a90308","#ff000d"]]
-        self.colors = [["black","#28282B"],["#002d04","#2a7e19"],["#000133","skyblue"],["#1f0954","#6d5caf"],["#a90308","#ff000d"],["#005558","#90DCD5"],["#001769","#005CC9"],["#3C1C16","#A05745"]]
+        self.colors = [["black","#28282B"],["#002d04","#2a7e19"],["#000133","skyblue"],["#1f0954","#6d5caf"],["#005558","#90DCD5"],["#001769","#005CC9"],["#3C1C16","#A05745"]]
         #For ink stains``
         self.ink_templates =  Handwritten(path=template_pth,n=10000)
         self.n_templ = len(self.ink_templates)
@@ -78,7 +76,7 @@ class DcisinkDataset(BaseDataset, ExtractPatches):
                                           colors=self.colors
                                          )
 
-        self.ink_generator.ALPHA = [0.5,0.85]
+        self.ink_generator.ALPHA = [0.75,0.95]
         
         BaseDataset.__init__(self, opt)
         
@@ -86,23 +84,58 @@ class DcisinkDataset(BaseDataset, ExtractPatches):
 
         image_pths = [str(Path(image_pth)/i.strip("\n")) for i in image_ids]
         
+        #DCIS
         ExtractPatches.__init__(self,        
                                 image_pths,
                                 tile_h,
                                 tile_w,
-                                opt.stride_h,
-                                opt.stride_w,
+                                6,
+                                6,
                                 spacing=0.5,
                                 mask_pth=None,
                                 # output_pth=str(Path(opt.checkpoints_dir)/opt.name),
                                 output_pth=opt.checkpoints_dir,
                                 lwst_level_idx=lwst_level_idx,
                                 mode=opt.mode,
-                                train_split=train_split,
-                                threshold=threshold,
+                                train_split=1,
+                                threshold=0.7,
                                 transform=transform,
                                 get_template=False,
                                 )
+        
+        dcis_all_image_tiles_hr = self.all_image_tiles_hr.copy()
+        print(f"DCIS dataset length: {len(dcis_all_image_tiles_hr)}")
+        
+        #TIGER dataset
+        image_pth = "/labs3/amartel_data3/tiger_dataset/SSL_training"
+        template_pth = "/localdisk3/ramanav/backup_codes/Ink_project/Projects/Dataset"
+        mask_pth = str(Path(image_pth) / "masks")
+        image_pth = str(Path(image_pth) / "images")
+
+        #Tiger
+        ExtractPatches.__init__(self,        
+                                image_pth,
+                                tile_h,
+                                tile_w,
+                                10,
+                                10,
+                                mask_pth=mask_pth,
+                                output_pth=None,
+                                lwst_level_idx=lwst_level_idx,
+                                mode=opt.mode,
+                                train_split=1,
+                                threshold=0.9,
+                                transform=transform,
+                                get_template=False,
+                                )
+
+        tiger_all_image_tiles_hr = self.all_image_tiles_hr.copy()
+        print(f"Tiger dataset length: {len(tiger_all_image_tiles_hr)}")
+
+
+        #Concatenate
+        self.all_image_tiles_hr = np.concatenate((dcis_all_image_tiles_hr,tiger_all_image_tiles_hr))
+
 
         # save the option and dataset root
         #Basic Transforms

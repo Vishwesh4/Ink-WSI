@@ -29,6 +29,7 @@ See frequently asked questions at: https://github.com/junyanz/pytorch-CycleGAN-a
 import os
 import sys
 import random
+import time
 sys.path.append("/home/ramanav/Projects/Ink-WSI")
 
 from tqdm import tqdm
@@ -45,6 +46,7 @@ import torch
 from modules.metrics import ssim, psnr, mse, pbvif
 from modules import train_filter
 import trainer
+
 
 def calc_imagemmetrics(img_ref,img_src):
     ssim_calc = ssim(img_ref, img_src)
@@ -80,6 +82,9 @@ if __name__ == '__main__':
     # opt.direction = "AtoB"
     # opt.name = "tiger_pix2pix_earlystop"
     
+    time_curr = time.localtime()
+    time_str = f"{time_curr.tm_mday}{time_curr.tm_mon}{time_curr.tm_min}{time_curr.tm_sec}"
+
     dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
     model = create_model(opt)      # create a model given opt.model and other options
     model.setup(opt)               # regular setup: load and print networks; create schedulers
@@ -90,7 +95,7 @@ if __name__ == '__main__':
         wandb_run._label(repo='CycleGAN-and-pix2pix')
 
     # create a website
-    web_dir = os.path.join(opt.results_dir, opt.name, '{}_{}'.format(opt.phase, opt.epoch))  # define the website directory
+    web_dir = os.path.join(opt.results_dir, opt.name, '{}_{}_{}'.format(time_str,opt.phase, opt.epoch))  # define the website directory
     if opt.load_iter > 0:  # load_iter is 0 by default
         web_dir = '{:s}_iter{:d}'.format(web_dir, opt.load_iter)
     print('creating web directory', web_dir)
@@ -102,7 +107,7 @@ if __name__ == '__main__':
     ink_index = []
     all_label = []
     
-    model_path = "/home/ramanav/Projects/Ink-WSI/Results/filter/Checkpoint_27Jul18_05_09_1.00.pt"
+    model_path = "/localdisk3/ramanav/Results/Ink_WSI/Ink_filter/Checkpoint_27Jul18_05_09_1.00.pt"
     device = torch.device(f"cuda:{opt.gpu_ids[0]}")
     model_filter = trainer.Model.create("ink")
     model_filter.load_model_weights(model_path,torch.device("cpu"))
@@ -133,7 +138,7 @@ if __name__ == '__main__':
 
             all_calc.append((reference_calc,removal_calc))
             all_label.append(data['label'])
-            if i % 20 == 0:  # save images to an HTML file
+            if i % 15 == 0:  # save images to an HTML file
                 print('processing (%04d)-th image... %s' % (i, img_path))
                 save_images(webpage,(reference_calc,removal_calc), visuals, img_path, aspect_ratio=opt.aspect_ratio, width=opt.display_winsize, use_wandb=opt.use_wandb)
         webpage.save()  # save the HTML
