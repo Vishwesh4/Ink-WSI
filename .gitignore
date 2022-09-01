@@ -11,3 +11,5 @@ tests/Results
 *.png
 *.log
 *.txt
+Results
+tests

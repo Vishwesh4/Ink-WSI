@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import numpy as np
+import shapely
 from shapely.geometry import Point, Polygon
 
 from .sedeen_helpers import Labels, Annotation
@@ -174,6 +175,8 @@ class SedeenAnnotationParser:
             annotation["coordinates"] = np.array(annotation["coordinates"])
             #note the index of the potentially annular annotations, in particular green        
             label_name = annotation["label"]
+            if ((annotation["type"]==Polygon) and (len(annotation["coordinates"])<3)):
+                continue
             temp_annotation = Annotation(**annotation)
             #necessary step due to number of repeated annotations
             ann_objects.append(temp_annotation)

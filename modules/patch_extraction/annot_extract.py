@@ -79,14 +79,22 @@ class ExtractAnnotations(ExtractPatches):
             return img, label
 
     def tiles_array(self):
-        # Check image
-        if not exists(self.image_path):
-            raise Exception("WSI file does not exist in: %s" % str(self.image_path))
+        
         all_wsipaths = []
-        if Path(self.image_path).suffix[1:] in ["tif","svs"]:
-            all_wsipaths.append(self.image_path)
-        for file_ext in ['tif', 'svs']:
-            all_wsipaths = all_wsipaths + glob.glob('{}/*.{}'.format(self.image_path, file_ext))
+        if isinstance(self.image_path,list):
+            #Check if images in list exist
+            for i in range(len(self.image_path)):
+                if not(exists(self.image_path[i])):
+                    raise Exception("WSI file does not exist in: %s" % str(self.image_path[i]))
+            all_wsipaths = self.image_path.copy()
+        else:
+            # Check image
+            if not exists(self.image_path):
+                raise Exception("WSI file does not exist in: %s" % str(self.image_path))
+            if Path(self.image_path).suffix[1:] in ["tif","svs"]:
+                all_wsipaths.append(self.image_path)
+            for file_ext in ['tif', 'svs']:
+                all_wsipaths = all_wsipaths + glob.glob('{}/*.{}'.format(self.image_path, file_ext))
         random.shuffle(all_wsipaths)
         
         #Select subset of slides for training/val setup
@@ -110,6 +118,9 @@ class ExtractAnnotations(ExtractPatches):
 
                 "generate tiles for this wsi"
                 image_tiles_hr, template, labels = self.get_wsi_patches(wsipath)
+                
+                if self.get_template and (self.output_path is not None):
+                    cv2.imwrite(str(self.output_path / Path("templates") /f"{Path(wsipath).stem}_template.png"), 255 * (template > 0))
 
                 # Check if patches are generated or not for a wsi
                 if len(image_tiles_hr) == 0:
@@ -122,9 +133,6 @@ class ExtractAnnotations(ExtractPatches):
             # Stack all patches across images
             all_image_tiles_hr = np.concatenate(all_image_tiles_hr)
 
-        if self.get_template and (self.output_path is not None):
-            cv2.imwrite(str(Path(self.output_path) / "template.png"), 255 * (template > 0))
-        
         self.all_labels = np.array(all_labels)
         
         return all_image_tiles_hr, template

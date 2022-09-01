@@ -118,6 +118,9 @@ class Pairwise_ExtractAnnot(Pairwise_ExtractPatches):
                 "generate tiles for this wsi"
                 image_tiles_hr, template, labels = self.get_wsi_patches(wsipath)
 
+                if self.get_template and (self.output_path is not None):
+                    cv2.imwrite(str(self.output_path / Path("templates") /f"{Path(wsipath).stem}_template.png"), 255 * (template > 0))
+
                 # Check if patches are generated or not for a wsi
                 if len(image_tiles_hr) == 0:
                     print("bad wsi, no patches are generated for", str(wsipath))
@@ -129,9 +132,6 @@ class Pairwise_ExtractAnnot(Pairwise_ExtractPatches):
             # Stack all patches across images
             all_image_tiles_hr = np.concatenate(all_image_tiles_hr)
 
-        if self.get_template and (self.output_path is not None):
-            cv2.imwrite(str(Path(self.output_path) / "template.png"), 255 * (template > 0))
-        
         self.all_labels = np.array(all_labels)
         
         return all_image_tiles_hr, template

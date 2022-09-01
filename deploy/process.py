@@ -1,12 +1,14 @@
 import os
+import sys
+sys.path.append("../")
 
 import torch
 import numpy as np
 from pathlib import Path
 import torchvision
 
-from .utils import Ink_deploy
-from ..patch_extraction import ExtractPatches
+from utils import Ink_deploy
+from modules.patch_extraction import ExtractPatches
 
 # INPUT_FILE = "/labs3/amartel_data3/histology/Data/DCIS_cohort/PRECISE_NoRT/114793.svs"
 # INPUT_FILE = "/amartel_data4/Flow/DCIS_prediction/DCIS_Precise_20x/121504.svs"

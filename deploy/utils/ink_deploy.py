@@ -14,6 +14,7 @@ import sys
 from typing import Tuple, Union, List
 from tqdm import tqdm
 from pathlib import Path
+sys.path.append("../../")
 
 import numpy as np
 import torch, os
@@ -24,11 +25,11 @@ import matplotlib
 from matplotlib import pyplot as plt
 
 import trainer
-from ...train_filter import *
-from ...ink_removal.options.test_options import TestOptions
-from ...ink_removal.models import create_model
-from ...ink_removal.util.visualizer import save_images
-from ...ink_removal.util import html
+from train_filter.utils import *
+from ink_removal.options.test_options import TestOptions
+from ink_removal.models import create_model
+from ink_removal.util.visualizer import save_images
+from ink_removal.util import html
 
 class Ink_deploy:
     """

@@ -1,1 +1,1 @@
-from . import register, train_filter, deploy, metrics, patch_extraction
+from . import register, metrics, patch_extraction
