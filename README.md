@@ -12,11 +12,11 @@ The methodlogy consists of two networks:-
 2. Ink corrector: Pix2pix module for removing ink from a patch by image to image translation 
 An overview of the methodology and its results are shown below
 
-<img src="https://raw.github.com/Vishwesh4/Ink-WSI/master/images/methodology_overview.png" align="center" width="480" ><figcaption>Fig.1 - Methodology overview</figcaption></a>
+<img src="https://github.com/Vishwesh4/Ink-WSI/blob/master/images/methodology_overview.png" align="center" width="480" ><figcaption>Fig.1 - Methodology overview</figcaption></a>
 
-<img src="https://raw.github.com/Vishwesh4/Ink-WSI/master/images/inkfilter.png" align="center" width="480" ><figcaption>Fig.2 - Ink filter output</figcaption></a> 
+<img src="https://github.com/Vishwesh4/Ink-WSI/blob/master/images/inkfilter.png" align="center" width="480" ><figcaption>Fig.2 - Ink filter output</figcaption></a> 
 
-<img src="https://raw.github.com/Vishwesh4/Ink-WSI/master/images/pix2pix_results.png" align="center" width="480" ><figcaption>Fig.3 - Pix2pix output</figcaption></a> 
+<img src="https://github.com/Vishwesh4/Ink-WSI/blob/master/images/pix2pix_results.png" align="center" width="480" ><figcaption>Fig.3 - Pix2pix output</figcaption></a> 
 
 ## Getting Started
 
