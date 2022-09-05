@@ -5,14 +5,8 @@
 # Author: Vishwesh Ramanathan
 # Email: vishwesh.ramanathan@mail.utoronto.ca
 # Description: This script is about ink generation. This code is based on ink generation code written during rotations, find
-# old codes in titania data3
-# THERE ARE FEW CASES WHERE THE MASK IS OF VERY LOW VALUE DUE TO WHICH NO INK MARK IS VISIBILE, I DIDNT CORRECT IT FOR NOW
-# 
-# Modifications (date, what was modified):
-#   1. Converted old code to class structure for better readability
-#   2. Fixed bug where the code generated very small templates causing issues in get_random_patches
 # --------------------------------------------------------------------------------------------------------------------------
-#
+
 import cv2
 import torch
 import numpy as np

@@ -14,14 +14,13 @@ opt.serial_batches = True  # disable data shuffling; comment this line if result
 opt.no_flip = True    # no flip; comment this line if results on flipped images are needed.
 opt.display_id = -1 
 
-
-with open(os.path.join(opt.results_dir, opt.name,"test_latest", f'{opt.name}_ref_remove_imagemetrics.pkl'), 'rb') as f:
+with open(os.path.join(opt.results_dir, opt.name,f"{opt.version}_test_latest", f'{opt.name}_ref_remove_imagemetrics.pkl'), 'rb') as f:
     all_calc = pkl.load(f)
 
-with open(os.path.join(opt.results_dir, opt.name,"test_latest", f'{opt.name}_filtered_indx.pkl'),"rb") as f:
+with open(os.path.join(opt.results_dir, opt.name,f"{opt.version}_test_latest", f'{opt.name}_filtered_indx.pkl'),"rb") as f:
     ink_index = pkl.load(f)
 
-with open(os.path.join(opt.results_dir, opt.name,"test_latest", f'{opt.name}_labels.pkl'), 'rb') as f:
+with open(os.path.join(opt.results_dir, opt.name,f"{opt.version}_test_latest", f'{opt.name}_labels.pkl'), 'rb') as f:
     all_labels = pkl.load(f)
 
 print(f"Length of all_calc : {len(all_calc)}")
@@ -33,67 +32,13 @@ all_calc = np.array(all_calc)
 ink_index = np.array(ink_index)
 all_labels = np.array(all_labels)[:len(all_calc)]
 
-# #Full stats
-# print("All Slides")
-# print("Ink Slides")
-# print("SSIM: {} + {}".format(np.mean(all_calc[:,0,0]),1.96*np.std(all_calc[:,0,0])/np.sqrt(len(all_calc))))
-# print("PSNR: {} + {}".format(np.mean(all_calc[:,0,1]),1.96*np.std(all_calc[:,0,1])/np.sqrt(len(all_calc))))
-# print("VIF: {} + {}".format(np.mean(all_calc[:,0,2]),1.96*np.std(all_calc[:,0,2])/np.sqrt(len(all_calc))))
-# print("\n")
-# print("Removal Slides")
-# print("SSIM: {} + {}".format(np.mean(all_calc[:,1,0]),1.96*np.std(all_calc[:,1,0])/np.sqrt(len(all_calc))))
-# print("PSNR: {} + {}".format(np.mean(all_calc[:,1,1]),1.96*np.std(all_calc[:,1,1])/np.sqrt(len(all_calc))))
-# print("VIF: {} + {}".format(np.mean(all_calc[:,1,2]),1.96*np.std(all_calc[:,1,2])/np.sqrt(len(all_calc))))
-
-# #Inked tissues
-# indices = np.where(all_labels==1)[0]
-# print("Inked Patches")
-# print("Ink Slides")
-# print("SSIM: {} + {}".format(np.mean(all_calc[indices,0,0]),1.96*np.std(all_calc[indices,0,0])/np.sqrt(len(all_calc))))
-# print("PSNR: {} + {}".format(np.mean(all_calc[indices,0,1]),1.96*np.std(all_calc[indices,0,1])/np.sqrt(len(all_calc))))
-# print("VIF: {} + {}".format(np.mean(all_calc[indices,0,2]),1.96*np.std(all_calc[indices,0,2])/np.sqrt(len(all_calc))))
-# print("\n")
-# print("Removal Slides")
-# print("SSIM: {} + {}".format(np.mean(all_calc[indices,1,0]),1.96*np.std(all_calc[indices,1,0])/np.sqrt(len(all_calc))))
-# print("PSNR: {} + {}".format(np.mean(all_calc[indices,1,1]),1.96*np.std(all_calc[indices,1,1])/np.sqrt(len(all_calc))))
-# print("VIF: {} + {}".format(np.mean(all_calc[indices,1,2]),1.96*np.std(all_calc[indices,1,2])/np.sqrt(len(all_calc))))
-
-# #Non Inked tissues
-# indices = np.where(all_labels==0)[0]
-# print("Inked Patches")
-# print("Ink Slides")
-# print("SSIM: {} + {}".format(np.mean(all_calc[indices,0,0]),1.96*np.std(all_calc[indices,0,0])/np.sqrt(len(all_calc))))
-# print("PSNR: {} + {}".format(np.mean(all_calc[indices,0,1]),1.96*np.std(all_calc[indices,0,1])/np.sqrt(len(all_calc))))
-# print("VIF: {} + {}".format(np.mean(all_calc[indices,0,2]),1.96*np.std(all_calc[indices,0,2])/np.sqrt(len(all_calc))))
-# print("\n")
-# print("Removal Slides")
-# print("SSIM: {} + {}".format(np.mean(all_calc[indices,1,0]),1.96*np.std(all_calc[indices,1,0])/np.sqrt(len(all_calc))))
-# print("PSNR: {} + {}".format(np.mean(all_calc[indices,1,1]),1.96*np.std(all_calc[indices,1,1])/np.sqrt(len(all_calc))))
-# print("VIF: {} + {}".format(np.mean(all_calc[indices,1,2]),1.96*np.std(all_calc[indices,1,2])/np.sqrt(len(all_calc))))
-
-# #Filtered tissues
-# indices = ink_index
-# print("Inked Patches")
-# print("Ink Slides")
-# print("SSIM: {} + {}".format(np.mean(all_calc[indices,0,0]),1.96*np.std(all_calc[indices,0,0])/np.sqrt(len(all_calc))))
-# print("PSNR: {} + {}".format(np.mean(all_calc[indices,0,1]),1.96*np.std(all_calc[indices,0,1])/np.sqrt(len(all_calc))))
-# print("VIF: {} + {}".format(np.mean(all_calc[indices,0,2]),1.96*np.std(all_calc[indices,0,2])/np.sqrt(len(all_calc))))
-# print("\n")
-# print("Removal Slides")
-# print("SSIM: {} + {}".format(np.mean(all_calc[indices,1,0]),1.96*np.std(all_calc[indices,1,0])/np.sqrt(len(all_calc))))
-# print("PSNR: {} + {}".format(np.mean(all_calc[indices,1,1]),1.96*np.std(all_calc[indices,1,1])/np.sqrt(len(all_calc))))
-# print("VIF: {} + {}".format(np.mean(all_calc[indices,1,2]),1.96*np.std(all_calc[indices,1,2])/np.sqrt(len(all_calc))))
-
-# print("Done")
-
-
 #Full stats
-print("All Slides")
-print("Ink Slides")
+print("All tissue patches")
+print("Original")
 print("SSIM: {} + {}".format(np.mean(all_calc[:,0,0]),np.std(all_calc[:,0,0])))
 print("PSNR: {} + {}".format(np.mean(all_calc[:,0,1]),np.std(all_calc[:,0,1])))
 print("VIF: {} + {}".format(np.mean(all_calc[:,0,2]),np.std(all_calc[:,0,2])))
-print("Removal Slides")
+print("Restored")
 print("SSIM: {} + {}".format(np.mean(all_calc[:,1,0]),np.std(all_calc[:,1,0])))
 print("PSNR: {} + {}".format(np.mean(all_calc[:,1,1]),np.std(all_calc[:,1,1])))
 print("VIF: {} + {}".format(np.mean(all_calc[:,1,2]),np.std(all_calc[:,1,2])))
@@ -101,49 +46,37 @@ print("\n")
 
 #Inked tissues
 indices = np.where(all_labels==1)[0]
-print("Inked Patches")
-print("Ink Slides")
+print("Inked tissue Patches")
+print("Original")
 print("SSIM: {} + {}".format(np.mean(all_calc[indices,0,0]),np.std(all_calc[indices,0,0])))
 print("PSNR: {} + {}".format(np.mean(all_calc[indices,0,1]),np.std(all_calc[indices,0,1])))
 print("VIF: {} + {}".format(np.mean(all_calc[indices,0,2]),np.std(all_calc[indices,0,2])))
-print("Removal Slides")
+print("Restored")
 print("SSIM: {} + {}".format(np.mean(all_calc[indices,1,0]),np.std(all_calc[indices,1,0])))
 print("PSNR: {} + {}".format(np.mean(all_calc[indices,1,1]),np.std(all_calc[indices,1,1])))
 print("VIF: {} + {}".format(np.mean(all_calc[indices,1,2]),np.std(all_calc[indices,1,2])))
 print("\n")
-#Non Inked tissues
+#Clean tissues
 indices = np.where(all_labels==0)[0]
-print("Non Inked Patches")
-print("Ink Slides")
+print("Clean tissue Patches")
+print("Original")
 print("SSIM: {} + {}".format(np.mean(all_calc[indices,0,0]),np.std(all_calc[indices,0,0])))
 print("PSNR: {} + {}".format(np.mean(all_calc[indices,0,1]),np.std(all_calc[indices,0,1])))
 print("VIF: {} + {}".format(np.mean(all_calc[indices,0,2]),np.std(all_calc[indices,0,2])))
-print("Removal Slides")
+print("Restored")
 print("SSIM: {} + {}".format(np.mean(all_calc[indices,1,0]),np.std(all_calc[indices,1,0])))
 print("PSNR: {} + {}".format(np.mean(all_calc[indices,1,1]),np.std(all_calc[indices,1,1])))
 print("VIF: {} + {}".format(np.mean(all_calc[indices,1,2]),np.std(all_calc[indices,1,2])))
 print("\n")
 #Filtered tissues
-# indices = ink_index
-# print("Filter Inked Patches")
-# print("Ink Slides")
-# print("SSIM: {} + {}".format(np.mean(all_calc[indices,0,0]),np.std(all_calc[indices,0,0])))
-# print("PSNR: {} + {}".format(np.mean(all_calc[indices,0,1]),np.std(all_calc[indices,0,1])))
-# print("VIF: {} + {}".format(np.mean(all_calc[indices,0,2]),np.std(all_calc[indices,0,2])))
-# print("Removal Slides")
-# print("SSIM: {} + {}".format(np.mean(all_calc[indices,1,0]),np.std(all_calc[indices,1,0])))
-# print("PSNR: {} + {}".format(np.mean(all_calc[indices,1,1]),np.std(all_calc[indices,1,1])))
-# print("VIF: {} + {}".format(np.mean(all_calc[indices,1,2]),np.std(all_calc[indices,1,2])))
-# print("\n")
-
 ink_indices = ink_index
 clean_indices = np.array(list(set(np.arange(len(all_calc)))-set(ink_indices)))
-print("Filter Inked Patches")
-print("Ink Slides")
+print("Filtered tissue Patches")
+print("Original")
 print("SSIM: {} + {}".format(np.mean(all_calc[:,0,0]),np.std(all_calc[:,0,0])))
 print("PSNR: {} + {}".format(np.mean(all_calc[:,0,1]),np.std(all_calc[:,0,1])))
 print("VIF: {} + {}".format(np.mean(all_calc[:,0,2]),np.std(all_calc[:,0,2])))
-print("Removal Slides")
+print("Restored")
 form_list = np.concatenate((all_calc[ink_indices,1,:],all_calc[clean_indices,0,:]))
 print("SSIM: {} + {}".format(np.mean(form_list[:,0]),np.std(form_list[:,0])))
 print("PSNR: {} + {}".format(np.mean(form_list[:,1]),np.std(form_list[:,1])))

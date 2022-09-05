@@ -1,6 +1,7 @@
 import os
 import sys
-sys.path.append("../../")
+from pathlib import Path
+sys.path.append(Path(__file__).parent.parent.parent)
 
 from pathlib import Path
 import torch.utils.data as data
@@ -29,7 +30,6 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
         Returns:
             the modified parser.
         """
-        # parser.add_argument('--new_dataset_option', type=float, default=1.0, help='new dataset option')
         parser.add_argument('--mode',type=str,default="train",help="Train/Test")
         parser.add_argument('--stride_h',type=float,default=5,help="Stride factor with tile size 256 in y direction")
         parser.add_argument('--stride_w',type=float,default=5,help="Stride factor with tile size 256 in x direction")
@@ -56,17 +56,9 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
         - get image paths and meta information of the dataset.
         - define the image transformation.
         """
-        # image_pth = "/labs3/amartel_data3/tiger_dataset/SSL_training"
-        # template_pth = "/home/ramanav/Projects/Ink_project/Projects/Dataset"
-        # mask_pth = str(Path(image_pth) / "masks")
-        # image_pth = str(Path(image_pth) / "images")
-
         df = pd.read_excel("~/Downloads/pairs.ods")
         ink_slide_path = "/amartel_data4/Flow/DCIS_prediction/DCIS_Precise_20x/"
         clean_path = "/labs3/amartel_data3/histology/Data/DCIS_cohort/PRECISE_NoRT/"
-
-        # ink_slide = str( Path(ink_slide_path) / (str(df["Ink Slides"][0])+".svs" ) )
-        # clean_slide = str( Path(clean_path) / (str(df["Clean Slides"][0])+".svs" ) )
 
         pair_list = [(str( Path(clean_path) / (str(df["Clean Slides"][i])+".svs" ) ),str( Path(ink_slide_path) / (str(df["Ink Slides"][i])+".svs" ) ))
                 for i in range(len(df))]
@@ -93,7 +85,6 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
                                 sample_threshold=50
                                 )
         
-        # print("Number of Patches Extracted: {}".format(len(self.all_image_tiles_hr)))
         all_labels = np.array(self.all_labels)
         all_labels_1 = np.where(all_labels==1)[0]
         all_labels_0 = np.where(all_labels==0)[0]
@@ -104,11 +95,6 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
         self.all_lab_shuff_idx = np.concatenate((all_labels_1[:opt.num_test//2],all_labels_0[:opt.num_test//2]))
         np.random.shuffle(self.all_lab_shuff_idx)
         print(f"Length of dataset: {len(self.all_lab_shuff_idx)}")
-	# ExtractPatches.__init__(self,image_pth, tile_h, tile_w, tile_stride_factor_h, tile_stride_factor_w, spacing, mask_pth, output_pth, lwst_level_idx, opt.mode, train_split, threshold, transform)
-
-        # save the option and dataset root
-        #Basic Transforms
-        # self.transform = transforms.Compose([transforms.ToTensor(),Normalize])
 
     def __getitem__(self, index):
         """Return a data point and its metadata information.
@@ -124,9 +110,7 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
         index = self.all_lab_shuff_idx[index]
         ink_img, clean_img = self.all_image_tiles_hr[index]
         label = self.all_labels[index]
-        #Get fake images
-        # gen_image,label = self.add_inkstain(img)
-        # data_A =  self.transform(Image.fromarray((gen_image*255).astype(np.uint8)))
+        #Get images and transform
         data_A =  self.transform(Image.fromarray(ink_img))
         data_B =  self.transform(Image.fromarray(clean_img))
         
@@ -157,6 +141,3 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
         else:
             return img
 
-    # @property
-    # def labels(self):
-    #     return self.all_labels

@@ -1,7 +1,7 @@
 import os
 import sys
-sys.path.append("../../")
-# sys.path.append("/home/ramanav/Projects/pytorch-CycleGAN-and-pix2pix")
+from pathlib import Path
+sys.path.append(Path(__file__).parent.parent.parent)
 
 from pathlib import Path
 import torch.utils.data as data
@@ -16,7 +16,6 @@ import modules
 from modules.patch_extraction import ExtractPatches
 from train_filter.utils import Handwritten
 from train_filter.utils import InkGenerator
-# from data.extract_patches import Vectorize_WSIs
 from data.base_dataset import BaseDataset, get_transform
 
 class DcisinkDataset(BaseDataset, ExtractPatches):
@@ -33,7 +32,6 @@ class DcisinkDataset(BaseDataset, ExtractPatches):
         Returns:
             the modified parser.
         """
-        # parser.add_argument('--new_dataset_option', type=float, default=1.0, help='new dataset option')
         parser.add_argument('--mode',type=str,default="train",help="Train/Test")
         parser.add_argument('--stride_h',type=float,default=5,help="Stride factor with tile size 256 in y direction")
         parser.add_argument('--stride_w',type=float,default=5,help="Stride factor with tile size 256 in x direction")
@@ -66,10 +64,7 @@ class DcisinkDataset(BaseDataset, ExtractPatches):
         template_pth = "/localdisk3/ramanav/backup_codes/Ink_project/Projects/Dataset"
         with open("/home/ramanav/Projects/Ink-WSI/modules/ink_removal/data/newdomain_slides.txt","r") as f:
             image_ids = f.readlines()
-        # mask_pth = str(Path(image_pth) / "masks")
-        # image_pth = str(Path(image_pth) / "images")
         
-        # self.colors = [["black","#28282B"],["#002d04","#2a7e19"],["#000133","skyblue"],["#1f0954","#6d5caf"],["#a90308","#ff000d"]]
         self.colors = [["black","#28282B"],["#002d04","#2a7e19"],["#000133","skyblue"],["#1f0954","#6d5caf"],["#a90308","#ff000d"],["#005558","#90DCD5"],["#001769","#005CC9"],["#3C1C16","#A05745"]]
         #For ink stains``
         self.ink_templates =  Handwritten(path=template_pth,n=10000)
@@ -94,7 +89,6 @@ class DcisinkDataset(BaseDataset, ExtractPatches):
                                 opt.stride_w,
                                 spacing=0.5,
                                 mask_pth=None,
-                                # output_pth=str(Path(opt.checkpoints_dir)/opt.name),
                                 output_pth=opt.checkpoints_dir,
                                 lwst_level_idx=lwst_level_idx,
                                 mode=opt.mode,
@@ -103,10 +97,6 @@ class DcisinkDataset(BaseDataset, ExtractPatches):
                                 transform=transform,
                                 get_template=False,
                                 )
-
-        # save the option and dataset root
-        #Basic Transforms
-        # self.transform = transforms.Compose([transforms.ToTensor(),Normalize])
 
     def __getitem__(self, index):
         """Return a data point and its metadata information.

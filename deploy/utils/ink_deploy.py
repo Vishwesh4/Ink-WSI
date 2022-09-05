@@ -4,17 +4,14 @@
 #
 # Author: Vishwesh Ramanathan
 # Email: vishwesh.ramanathan@mail.utoronto.ca
-# Description: This script is about ink filter
-# Modifications (date, what was modified):
-#   1. Aug 10: Modified for using the current version of ink filter
-#   2. Aug 17. Modified to include ink removal module using pix2pix
+# Description: This script is about ink filter and ink removal class for deployment
 # --------------------------------------------------------------------------------------------------------------------------
-#
+
 import sys
 from typing import Tuple, Union, List
 from tqdm import tqdm
 from pathlib import Path
-sys.path.append("../../")
+sys.path.append(str(Path(__file__).parent.parent.parent))
 
 import numpy as np
 import torch, os
@@ -39,7 +36,7 @@ class Ink_deploy:
     NUM_CLASSES = 2
     CLASSES = ["Clean","Ink Region"]
     TRANSFORM = transforms.ToTensor()
-    def __init__(self, model_path:str, output_dir:str=None, remover_name:str=None, device=torch.device("cpu")) -> None:
+    def __init__(self, filter_path:str, output_dir:str=None, pix2pix_path:str=None, device=torch.device("cpu")) -> None:
        """
        Initializes model of ink filter and if remover_name is not none then pix2pix model
        Parameters:
@@ -50,22 +47,25 @@ class Ink_deploy:
        self.device = device
        device_id = self.device.index
        self.output_dir = output_dir
-       self.remover_name = remover_name
 
        #build ink detection network
-       self.build_network(model_path)
+       self.build_network(filter_path)
 
        #build ink removal network
-       if remover_name is not None:
+       if pix2pix_path is not None:
+            #Get in pixpix format
+            pix2pix_pth = Path(pix2pix_path)
+            self.remover_name = pix2pix_pth.parent.name
+            pix2pix_result_dir = str(pix2pix_pth.parent.parent)       
             print("Loading ink removal module...")
             #Modify few parameters
-            Ink_remover.OPTIONS["results_dir"] = output_dir
+            Ink_remover.OPTIONS["save_dir"] = output_dir
+            Ink_remover.OPTIONS["checkpoints_dir"] = pix2pix_result_dir
             Ink_remover.OPTIONS["gpu_ids"] = [device_id]
-            Ink_remover.OPTIONS["name"] = remover_name
+            Ink_remover.OPTIONS["name"] = self.remover_name
             
             self.ink_remover = Ink_remover.build_opt()
 
-        
     def build_network(self,model_path:str) -> None:
         print("Loading ink filter module...")
         self.model = trainer.Model.create("ink")
@@ -110,7 +110,7 @@ class Ink_deploy:
                 predicted_labels.extend(labels.cpu().numpy())
         predicted_labels = np.array(predicted_labels)
 
-        if self.output_dir is not None:
+        if (self.output_dir is not None) and (template is not None):
             #Plot and save the results
             self.plot_results(predicted_labels, slide_name, template)
 
@@ -172,8 +172,8 @@ class Ink_remover:
         "serial_batches" : True, 
         "no_flip" : True,
         "display_id" : -1,
-        "checkpoints_dir" : "/localdisk3/ramanav/Results/Pix2Pix/",
-        "results_dir" : "/localdisk3/ramanav/Results/Pix2Pix/",
+        "checkpoints_dir" : "./Results",
+        "save_dir": None,
         "gpu_ids" : [0],
         "batch_size" : 1,
         "direction" : "AtoB",
@@ -223,9 +223,9 @@ class Ink_remover:
         rectified_dataset = []
         dataloader = torch.utils.data.DataLoader(new_dataset, batch_size=self.opt.batch_size,shuffle=False)
         
-        if self.opt.results_dir is not None:
+        if self.opt.save_dir is not None:
             # create a website
-            web_dir = os.path.join(self.opt.results_dir,slide_name, self.opt.name, '{}_{}'.format(self.opt.phase, self.opt.epoch))  # define the website directory
+            web_dir = os.path.join(self.opt.save_dir,slide_name, self.opt.name, '{}_{}'.format(self.opt.phase, self.opt.epoch))  # define the website directory
             if self.opt.load_iter > 0:  # load_iter is 0 by default
                 web_dir = '{:s}_iter{:d}'.format(web_dir, self.opt.load_iter)
             print('creating web directory', web_dir)
@@ -241,13 +241,13 @@ class Ink_remover:
             #Collect rectified images
             rectified_dataset.extend(visuals["fake_B"].permute(0,2,3,1).cpu().numpy()*255)
 
-            if self.opt.results_dir is not None:
+            if self.opt.save_dir is not None:
                 #Save images at a constant interval
                 if i%Ink_remover.SAVE_FREQ==0:
                     save_images(self.webpage,(0,0), visuals, img_path, aspect_ratio=self.opt.aspect_ratio, width=self.opt.display_winsize, use_wandb=self.opt.use_wandb)
 
         
-        if self.opt.results_dir is not None:
+        if self.opt.save_dir is not None:
             self.webpage.save()
 
         return rectified_dataset

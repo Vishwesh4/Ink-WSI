@@ -22,8 +22,7 @@ except:
 
 class ExtractPatches(Dataset):
     """
-    WSI dataset
-    This class is a modification of what chetan built. This class based on given image path,
+    WSI dataset, This class based on given image path,
     extracts tissue mask at a lower resolution. The image is loaded and converted to the desired spacing as given in the parameter.
     Based on this , points are extracted at a uniform stride and ensured that the patch belongs inside the whole slide
     """
@@ -92,6 +91,8 @@ class ExtractPatches(Dataset):
 
         if self.output_path is not None:
             self.output_path = Path(self.output_path)
+            if not (self.output_path).is_dir():
+                os.mkdir(self.output_path)
             if not (self.output_path/"masks").is_dir():
                 os.mkdir(self.output_path/"masks")
             if not (self.output_path/"templates").is_dir():

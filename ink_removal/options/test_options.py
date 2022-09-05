@@ -1,3 +1,4 @@
+from email.policy import default
 from .base_options import BaseOptions
 
 
@@ -16,6 +17,8 @@ class TestOptions(BaseOptions):
         parser.add_argument('--eval', action='store_true', help='use eval mode during test time.')
         parser.add_argument('--num_test', type=int, default=10000, help='how many test images to run')
         parser.add_argument('--get_probs', type=bool, default=False, help='If you want to return probability values')
+        parser.add_argument('--version', type=str, default="", help="Specify folder name where test_ink results are stored, \
+                                                                    the folder names are in the format version_test_latest")
         # rewrite devalue values
         parser.set_defaults(model='test')
         # To avoid cropping, the load_size should be the same as crop_size

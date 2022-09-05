@@ -1,22 +1,20 @@
 import os
 import sys
-sys.path.append("../")
+from pathlib import Path
+sys.path.append(Path(__file__).parent.parent)
 
 import torch
 import numpy as np
-from pathlib import Path
 import torchvision
 
 from utils import Ink_deploy
 from modules.patch_extraction import ExtractPatches
 
-# INPUT_FILE = "/labs3/amartel_data3/histology/Data/DCIS_cohort/PRECISE_NoRT/114793.svs"
-# INPUT_FILE = "/amartel_data4/Flow/DCIS_prediction/DCIS_Precise_20x/121504.svs"
-# INPUT_FILE = "/amartel_data4/Flow/DCIS_prediction/DCIS_Precise_20x/121504.svs"
-INPUT_FILE = "/amartel_data4/Flow/DCIS_prediction/DCIS_Precise_20x/121393.svs"
 
+INPUT_FILE = "/amartel_data4/Flow/DCIS_prediction/DCIS_Precise_20x/121504.svs"
 OUTPUT_DIR = "/home/ramanav/Projects/Ink-WSI/tests/Results"
-
+INK_PATH = "/home/ramanav/Projects/Ink-WSI/Ink_removal_weights/filter_weights.pt"
+PIX2PIX_PATH = "/home/ramanav/Projects/Ink-WSI/Ink_removal_weights/latest_net_G.pth"
 DEVICE = torch.device("cuda:3")
 TILE_H = 256
 TILE_W = 256
@@ -25,12 +23,10 @@ TILE_STRIDE_FACTOR_W = 1
 LWST_LEVEL_IDX = 0
 TRANSFORM = torchvision.transforms.ToTensor()
 SPACING = 0.456694
-INK_PATH = "/localdisk3/ramanav/Results/Ink_WSI/Ink_filter/Checkpoint_12Jul12_46_16_1.00.pt"
-PIX2PIX_NAME = "tiger_pix2pix_domaindata_alone_norm"
 
-inkdeploy = Ink_deploy(model_path=INK_PATH,
+inkdeploy = Ink_deploy(filter_path=INK_PATH,
                        output_dir=OUTPUT_DIR,
-                       remover_name=PIX2PIX_NAME,
+                       pix2pix_path=PIX2PIX_PATH,
                        device=DEVICE)
 
 slide_name = f"Slide_{Path(INPUT_FILE).stem}_pix2pix"
@@ -48,7 +44,10 @@ dataset = ExtractPatches(
         mode="train",
         train_split=1,
         transform=TRANSFORM,
-        threshold=0.7
+        threshold=0.7,
+        get_template=True
 )
 
 dataset, template = inkdeploy.filter(dataset = dataset, slide_name=slide_name, template = dataset.template)
+
+#SPECIFY THE DOWNSTREAM TASK BASED ON THE DATASET
