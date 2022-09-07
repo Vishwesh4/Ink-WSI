@@ -43,6 +43,7 @@ class ExtractPatches(Dataset):
         threshold=0.7,
         transform=None,
         get_template=False,
+        get_coordinates=False,
         **kwargs
     ):
 
@@ -76,6 +77,7 @@ class ExtractPatches(Dataset):
         self.train_split = train_split
         self.threshold = threshold
         self.get_template = get_template
+        self.get_coordinates = get_coordinates
 
         for key,value in kwargs.items():
             setattr(self,key,value)
@@ -141,6 +143,8 @@ class ExtractPatches(Dataset):
         else:
             wsipaths = all_wsipaths
 
+        self.all_coordinates = []
+
         with tqdm(enumerate(sorted(wsipaths))) as t:
 
             all_image_tiles_hr = []
@@ -151,7 +155,7 @@ class ExtractPatches(Dataset):
                 )
 
                 "generate tiles for this wsi"
-                image_tiles_hr, template = self.get_wsi_patches(wsipath)
+                image_tiles_hr, template, coordinates = self.get_wsi_patches(wsipath)
 
                 if self.get_template and (self.output_path is not None):
                     cv2.imwrite(str(self.output_path / Path("templates") /f"{Path(wsipath).stem}_template.png"), 255 * (template > 0))
@@ -162,6 +166,9 @@ class ExtractPatches(Dataset):
                     continue
                 else:
                     all_image_tiles_hr.append(image_tiles_hr)
+
+                if self.get_coordinates:
+                    self.all_coordinates.append(np.array(coordinates))
 
             # Stack all patches across images
             all_image_tiles_hr = np.concatenate(all_image_tiles_hr)
@@ -257,6 +264,11 @@ class ExtractPatches(Dataset):
         else:
             template = None
 
+        if self.get_coordinates:
+            coordinates = []
+        else:
+            coordinates = None
+        
         for y,ypos in enumerate(range(sh, ih - 1 - ph, sh)):
             for x,xpos in enumerate(range(sw, iw - 1 - pw, sw)):
                 if self._isforeground((xpos, ypos), mask):  # Select valid foreground patch
@@ -264,19 +276,22 @@ class ExtractPatches(Dataset):
                     image_tile_hr = self._getpatch(scan, xpos, ypos)
 
                     image_tiles_hr.append(image_tile_hr)
-
+                    
                     patch_id = patch_id + 1
                     if self.get_template:
                         #Template filling
                         template[y,x] =  patch_id
+
+                    if self.get_coordinates:
+                        coordinates.append((xpos,ypos))
         
         # Concatenate
         if len(image_tiles_hr) == 0:
             image_tiles_hr == []
         else:
             image_tiles_hr = np.stack(image_tiles_hr, axis=0).astype("uint8")
-
-        return image_tiles_hr, template
+        
+        return image_tiles_hr, template, coordinates
 
     def _isforeground(self, coords, mask):
         if self.mask_path is None:

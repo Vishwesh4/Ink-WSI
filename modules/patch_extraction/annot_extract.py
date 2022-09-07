@@ -48,7 +48,8 @@ class ExtractAnnotations(ExtractPatches):
                  threshold=0.7, 
                  transform=None,
                  sample_threshold:int=80,
-                 get_template=False):
+                 get_template=False,
+                 get_coordinates=False):
         
         self.annotation_parser = SedeenAnnotationParser(renamed_label)
 
@@ -68,7 +69,8 @@ class ExtractAnnotations(ExtractPatches):
                          train_split, 
                          threshold, 
                          transform,
-                         get_template)
+                         get_template,
+                         get_coordinates)
 
     def __getitem__(self, index):
         img = self.all_image_tiles_hr[index]
@@ -106,6 +108,8 @@ class ExtractAnnotations(ExtractPatches):
         else:
             wsipaths = all_wsipaths
 
+        self.all_coordinates = []
+        
         with tqdm(enumerate(sorted(wsipaths))) as t:
 
             all_image_tiles_hr = []
@@ -117,7 +121,7 @@ class ExtractAnnotations(ExtractPatches):
                 )
 
                 "generate tiles for this wsi"
-                image_tiles_hr, template, labels = self.get_wsi_patches(wsipath)
+                image_tiles_hr, template, labels, coordinates = self.get_wsi_patches(wsipath)
                 
                 if self.get_template and (self.output_path is not None):
                     cv2.imwrite(str(self.output_path / Path("templates") /f"{Path(wsipath).stem}_template.png"), 255 * (template > 0))
@@ -129,6 +133,10 @@ class ExtractAnnotations(ExtractPatches):
                 else:
                     all_image_tiles_hr.append(image_tiles_hr)
                     all_labels.extend(labels)
+
+                if self.get_coordinates:
+                    self.all_coordinates.append(np.array(coordinates))
+
 
             # Stack all patches across images
             all_image_tiles_hr = np.concatenate(all_image_tiles_hr)
@@ -188,6 +196,11 @@ class ExtractAnnotations(ExtractPatches):
         else:
             template = None
 
+        if self.get_coordinates:
+            coordinates = []
+        else:
+            coordinates = None
+
         for y,ypos in enumerate(range(sh, ih - 1 - ph, sh)):
             for x,xpos in enumerate(range(sw, iw - 1 - pw, sw)):
                 inside, annot = self._in_annotation((xpos,ypos),annotations)
@@ -205,6 +218,9 @@ class ExtractAnnotations(ExtractPatches):
                         #Template filling
                         template[y,x] =  patch_id
 
+                    if self.get_coordinates:
+                        coordinates.append((xpos,ypos))
+
         
         # Concatenate
         if len(image_tiles_hr) == 0:
@@ -212,4 +228,4 @@ class ExtractAnnotations(ExtractPatches):
         else:
             image_tiles_hr = np.stack(image_tiles_hr, axis=0).astype("uint8")
 
-        return image_tiles_hr, template, labels
+        return image_tiles_hr, template, labels, coordinates

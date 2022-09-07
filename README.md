@@ -12,11 +12,11 @@ The methodlogy consists of two networks:-
 2. Ink corrector: Pix2pix module for removing ink from a patch by image to image translation 
 An overview of the methodology and its results are shown below
 
-<img src="https://github.com/Vishwesh4/Ink-WSI/blob/master/images/methodology_overview.png" align="center" width="480" ><figcaption>Fig.1 - Methodology overview</figcaption></a>
+<img src="https://github.com/Vishwesh4/Ink-WSI/blob/master/images/methodology_overview.png" align="center" width="880" ><figcaption>Fig.1 - Methodology overview</figcaption></a>
 
-<img src="https://github.com/Vishwesh4/Ink-WSI/blob/master/images/inkfilter.png" align="center" width="480" ><figcaption>Fig.2 - Ink filter output</figcaption></a> 
+<img src="https://github.com/Vishwesh4/Ink-WSI/blob/master/images/inkfilter.png" align="center" width="880" ><figcaption>Fig.2 - Ink filter output</figcaption></a> 
 
-<img src="https://github.com/Vishwesh4/Ink-WSI/blob/master/images/pix2pix_results.png" align="center" width="480" ><figcaption>Fig.3 - Pix2pix output</figcaption></a> 
+<img src="https://github.com/Vishwesh4/Ink-WSI/blob/master/images/pix2pix_results.png" align="center" width="880" ><figcaption>Fig.3 - Pix2pix output</figcaption></a> 
 
 ## Getting Started
 
@@ -69,7 +69,7 @@ For testing, corresponding ink and clean slides should be available
 The test model name has to be specified
 
 #### Deploy module
-1. The modules can be deployed using the class `Ink_deploy`. An example is shown in `./deploy/process.py`
+1. The modules can be deployed using the class `Ink_deploy`. An example is shown in `./deploy/process.py`. It also has a script `./deploy/construct_wsi.py` for running algorithm over a whole slide image, however it expects sedeen annotation.
 ```python
 ink_deploy = Ink_deploy(filter_path:str=INK_PATH,
                         output_dir:str=None, 

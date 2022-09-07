@@ -93,7 +93,7 @@ class Ink_deploy:
         _, predicted = torch.max(outputs.data, 1)
         return predicted 
 
-    def filter(self, dataset:Dataset, slide_name:str=None, template:np.array=None) -> Tuple[torch.utils.data.Dataset, Union[None,np.array]]:
+    def filter(self, dataset:Dataset, slide_name:str=None, template:np.array=None) -> Tuple[torch.utils.data.Dataset, Union[None,np.array], np.array]:
         """
         Given a Dataset object, creates a new Dataset object with filtered set of images
         """
@@ -105,6 +105,8 @@ class Ink_deploy:
         #Predict labels
         with torch.no_grad():
             for data in tqdm(dataloader,desc="Filtering out Ink"):
+                if isinstance(data,list):
+                    data = data[0]
                 images = data.to(self.device)
                 labels = self.predict_batch(images)
                 predicted_labels.extend(labels.cpu().numpy())
@@ -135,7 +137,7 @@ class Ink_deploy:
             template_flat[template_flat>0] = template_info
             new_template = template_flat.reshape(template.shape)
 
-        return full_dataset, new_template
+        return full_dataset, new_template, predicted_labels
 
 
     def plot_results(self,preds:np.array,slide_name:str,template:np.array):

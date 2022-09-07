@@ -12,9 +12,9 @@ from modules.patch_extraction import ExtractPatches
 
 
 INPUT_FILE = "/amartel_data4/Flow/DCIS_prediction/DCIS_Precise_20x/121504.svs"
-OUTPUT_DIR = "/home/ramanav/Projects/Ink-WSI/tests/Results"
-INK_PATH = "/home/ramanav/Projects/Ink-WSI/Ink_removal_weights/filter_weights.pt"
-PIX2PIX_PATH = "/home/ramanav/Projects/Ink-WSI/Ink_removal_weights/latest_net_G.pth"
+OUTPUT_DIR = str(Path(__file__).parent.parent / "tests/Results")
+INK_PATH = str(Path(__file__).parent.parent / "Ink_removal_weights/filter_weights.pt")
+PIX2PIX_PATH = str(Path(__file__).parent.parent / "Ink_removal_weights/latest_net_G.pth")
 DEVICE = torch.device("cuda:3")
 TILE_H = 256
 TILE_W = 256
@@ -48,6 +48,6 @@ dataset = ExtractPatches(
         get_template=True
 )
 
-dataset, template = inkdeploy.filter(dataset = dataset, slide_name=slide_name, template = dataset.template)
+dataset, template, filter_predictions = inkdeploy.filter(dataset = dataset, slide_name=slide_name, template = dataset.template)
 
 #SPECIFY THE DOWNSTREAM TASK BASED ON THE DATASET

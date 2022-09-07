@@ -85,7 +85,7 @@ if __name__ == '__main__':
     ink_index = []
     all_label = []
     
-    MODEL_PATH = "../Ink_removal_weights/filter_weights.pt"
+    MODEL_PATH = str(Path(__file__).parent.parent / "Ink_removal_weights/filter_weights.pt")
     device = torch.device(f"cuda:{opt.gpu_ids[0]}")
     model_filter = trainer.Model.create("ink")
     model_filter.load_model_weights(MODEL_PATH,torch.device("cpu"))

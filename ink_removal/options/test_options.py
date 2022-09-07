@@ -20,7 +20,7 @@ class TestOptions(BaseOptions):
         parser.add_argument('--version', type=str, default="", help="Specify folder name where test_ink results are stored, \
                                                                     the folder names are in the format version_test_latest")
         # rewrite devalue values
-        parser.set_defaults(model='test')
+        parser.set_defaults(model='pix2pix')
         # To avoid cropping, the load_size should be the same as crop_size
         parser.set_defaults(load_size=parser.get_default('crop_size'))
         self.isTrain = False

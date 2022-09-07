@@ -44,29 +44,6 @@ SPACING = None
 
 ink_labelset = {"clean":"#00ff00ff","ink":"#ff0000ff"}
 
-# dataset_list = []
-# for slides in slide_path:
-#         dataset = ExtractAnnotations(
-#                 image_pth=slides,
-#                 annotation_dir=annotation_dir,
-#                 renamed_label=ink_labelset,
-#                 tile_h=TILE_H,
-#                 tile_w=TILE_W,
-#                 tile_stride_factor_h=TILE_STRIDE_FACTOR_H,
-#                 tile_stride_factor_w=TILE_STRIDE_FACTOR_W,
-#                 spacing=None,
-#                 lwst_level_idx=LWST_LEVEL_IDX,
-#                 mode="train",
-#                 train_split=1,
-#                 transform=TRANSFORM,
-#                 threshold=0.7,
-#                 sample_threshold=50
-#                 )
-#         dataset_list.append(dataset)
-#         # break
-
-# all_dataset = torch.utils.data.ConcatDataset(dataset_list)
-
 all_dataset = ExtractAnnotations(
         image_pth=slide_path,
         annotation_dir=annotation_dir,
@@ -87,8 +64,7 @@ all_dataset = ExtractAnnotations(
 print(f"Total Length of the dataset: {len(all_dataset)}")
 
 #Ink filter model
-model_path = "/localdisk3/ramanav/Results/Ink_WSI/Ink_filter/Checkpoint_27Jul18_05_09_1.00.pt"
-# model_path = "/home/ramanav/Projects/Ink-WSI/Results/filter/Checkpoint_28Jul12_19_55_1.00.pt"
+model_path = str(Path(__file__).parent.parent / "Ink_removal_weights/filter_weights.pt")
 device = torch.device("cuda:3")
 model = trainer.Model.create("ink")
 model.load_model_weights(model_path,torch.device("cpu"))
