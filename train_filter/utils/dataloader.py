@@ -1,7 +1,7 @@
 from pathlib import Path
 import sys
 import random
-sys.path.append(Path(__file__).parent.parent.parent)
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 import torch
 import numpy as np

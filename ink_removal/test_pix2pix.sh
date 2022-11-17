@@ -1,6 +1,6 @@
 #!/bin/bash
 
-name="norm_mixed"
+name="norm_v2_nobrown"
 results_dir_path="/localdisk3/ramanav/Results/Pix2Pix/"
 checkpoints_dir_path="/localdisk3/ramanav/Results/Pix2Pix/"
 

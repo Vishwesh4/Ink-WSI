@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-sys.path.append(Path(__file__).parent.parent.parent)
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 from pathlib import Path
 import torch.utils.data as data
@@ -56,12 +56,16 @@ class MixedDataset(BaseDataset, ExtractPatches):
         - get image paths and meta information of the dataset.
         - define the image transformation.
         """
-        image_pth = "/amartel_data4/Flow/DCIS_prediction/DCIS_unknown"
+        # image_pth = "/amartel_data4/Flow/DCIS_prediction/DCIS_unknown"
+        image_pth = "/labs3/amartel_data3/histology/Data/DCIS_cohort/PRECISE_NoRT/"
+
         template_pth = "/localdisk3/ramanav/backup_codes/Ink_project/Projects/Dataset"
-        with open("/home/ramanav/Projects/Ink-WSI/modules/ink_removal/data/newdomain_slides.txt","r") as f:
+        with open("/home/ramanav/Projects/Ink-WSI/ink_removal/data/newdomain_slides_v1.txt","r") as f:
             image_ids = f.readlines()
         
-        self.colors = [["black","#28282B"],["#002d04","#2a7e19"],["#000133","skyblue"],["#1f0954","#6d5caf"],["#005558","#90DCD5"],["#001769","#005CC9"],["#3C1C16","#A05745"]]
+        # self.colors = [["black","#28282B"],["#002d04","#2a7e19"],["#000133","skyblue"],["#1f0954","#6d5caf"],["#005558","#90DCD5"],["#001769","#005CC9"],["#3C1C16","#A05745"]]
+        self.colors = [["black","#28282B"],["#002d04","#2a7e19"],["#000133","skyblue"],["#1f0954","#6d5caf"],["#005558","#90DCD5"],["#001769","#005CC9"]]
+
         #For ink stains``
         self.ink_templates =  Handwritten(path=template_pth,n=10000)
         self.n_templ = len(self.ink_templates)
@@ -69,7 +73,7 @@ class MixedDataset(BaseDataset, ExtractPatches):
                                           colors=self.colors
                                          )
 
-        self.ink_generator.ALPHA = [0.75,0.95]
+        self.ink_generator.ALPHA = [0.55,0.95]
         
         BaseDataset.__init__(self, opt)
         
@@ -82,8 +86,8 @@ class MixedDataset(BaseDataset, ExtractPatches):
                                 image_pths,
                                 tile_h,
                                 tile_w,
-                                6,
-                                6,
+                                7,
+                                7,
                                 spacing=0.5,
                                 mask_pth=None,
                                 output_pth=opt.checkpoints_dir,
@@ -105,27 +109,28 @@ class MixedDataset(BaseDataset, ExtractPatches):
         image_pth = str(Path(image_pth) / "images")
 
         #Tiger
-        ExtractPatches.__init__(self,        
-                                image_pth,
-                                tile_h,
-                                tile_w,
-                                10,
-                                10,
-                                mask_pth=mask_pth,
-                                output_pth=None,
-                                lwst_level_idx=lwst_level_idx,
-                                mode=opt.mode,
-                                train_split=1,
-                                threshold=0.9,
-                                transform=transform,
-                                get_template=False,
-                                )
+        # ExtractPatches.__init__(self,        
+        #                         image_pth,
+        #                         tile_h,
+        #                         tile_w,
+        #                         12,
+        #                         12,
+        #                         mask_pth=mask_pth,
+        #                         output_pth=None,
+        #                         lwst_level_idx=lwst_level_idx,
+        #                         mode=opt.mode,
+        #                         train_split=1,
+        #                         threshold=0.9,
+        #                         transform=transform,
+        #                         get_template=False,
+        #                         )
 
-        tiger_all_image_tiles_hr = self.all_image_tiles_hr.copy()
-        print(f"Tiger dataset length: {len(tiger_all_image_tiles_hr)}")
+        # tiger_all_image_tiles_hr = self.all_image_tiles_hr.copy()
+        # print(f"Tiger dataset length: {len(tiger_all_image_tiles_hr)}")
 
         #Concatenate
-        self.all_image_tiles_hr = np.concatenate((dcis_all_image_tiles_hr,tiger_all_image_tiles_hr))
+        # self.all_image_tiles_hr = np.concatenate((dcis_all_image_tiles_hr,tiger_all_image_tiles_hr))
+        self.all_image_tiles_hr = dcis_all_image_tiles_hr
 
     def __getitem__(self, index):
         """Return a data point and its metadata information.

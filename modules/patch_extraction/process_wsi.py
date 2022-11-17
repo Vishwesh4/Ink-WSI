@@ -14,11 +14,7 @@ from PIL import Image
 from skimage import io
 from pathlib import Path
 
-try:
-    sys.path.append("/amartel_data4/temp/lukasz_test/blur/")
-    from dptools.slides.processing.wsimask import WSIMask
-except:
-    warnings.warn("Tissue extraction code not found, please use some other package or provide with a tissue mask")
+from .extract_mask import extract_mask
 
 class ExtractPatches(Dataset):
     """
@@ -178,10 +174,10 @@ class ExtractPatches(Dataset):
     def _get_mask(self, wsipth):
         #If mask path not available, calulates the mask
         if self.mask_path is None:
-            tissue_mask = WSIMask(wsipth, min_size=500, mode="lab", threshold=0.1,fill_mask_kernel_size=9)
+            tissue_mask = extract_mask(wsipth,threshold=0.1,kernel_size=9)
+            mask_pil = Image.fromarray(255 * tissue_mask)
             if self.output_path is not None:
-                tissue_mask.save_png(str(self.output_path / Path("masks") / f"{Path(wsipth).stem}_mask_image.png"))
-            mask_pil = Image.fromarray(255 * tissue_mask.array.T)
+                mask_pil.save(str(str(self.output_path / Path("masks") / f"{Path(wsipth).stem}_mask_image.png")))
             mask = openslide.ImageSlide(mask_pil)
         else:
             filename, file_extension = os.path.splitext(Path(wsipth).name)

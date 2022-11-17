@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-sys.path.append(Path(__file__).parent.parent)
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
 import numpy as np

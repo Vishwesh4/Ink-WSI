@@ -17,7 +17,7 @@ import sys
 import random
 import time
 from pathlib import Path
-sys.path.append(Path(__file__).parent.parent)
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from tqdm import tqdm
 
