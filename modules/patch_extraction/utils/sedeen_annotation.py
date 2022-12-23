@@ -50,15 +50,27 @@ class SedeenAnnotationParser:
         #Construct using Labels
         labels_construct = []
         labels = list(set(labels))
+        renamed_list = [i for i in self._renamed_label.values()]
         for i in range(len(labels)):
-            name = labels[i]
-            labels_construct.append({"name":name,"value":i+1,"color":labels[i]})
-        
-        
-        
+            #Only include labels in renamed_label
+            if (labels[i] in renamed_list):
+                name = labels[i]
+                labels_construct.append({"name":name,"value":i+1,"color":labels[i]})
+                
+        #Check if all labels are available as given in the new set of labels, if not add the new label
+        att_value_list = [i["color"] for i in labels_construct]
+        count = len(att_value_list)
+        for keys,values in self._renamed_label.items():
+            if values not in att_value_list:
+               temp_dict = {}
+               count+=1
+               temp_dict["value"] = count
+               temp_dict["name"] = values
+               temp_dict["color"] = values
+               labels_construct.append(temp_dict)
+
         labels_final = Labels(labels_construct)
         labels_final = self._modify_labelset(labels_final)
-
         return labels_final
 
     def _get_label(self, child, labels: Labels, type):
@@ -154,7 +166,7 @@ class SedeenAnnotationParser:
                         label = self._get_label(grandchild,labels,type)
                     elif grandchild.tag == "point-list":
                         coordinates = self._get_coords(grandchild)
-                        if len(coordinates)>0:
+                        if len(coordinates)>0 and (label is not None):
                             yield {
                                     "type": type,
                                     "coordinates": coordinates,

@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+import argparse
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 import torch
@@ -10,12 +11,15 @@ import torchvision
 from utils import Ink_deploy
 from modules.patch_extraction import ExtractPatches
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", help="input slide location",required=True)
+args = parser.parse_args()
 
-INPUT_FILE = "/amartel_data4/Flow/DCIS_prediction/DCIS_Precise_20x/121504.svs"
+INPUT_FILE = args.i
 OUTPUT_DIR = str(Path(__file__).parent.parent / "tests/Results")
 INK_PATH = str(Path(__file__).parent.parent / "Ink_removal_weights/filter_weights.pt")
-PIX2PIX_PATH = str(Path(__file__).parent.parent / "Ink_removal_weights/latest_net_G.pth")
-DEVICE = torch.device("cuda:3")
+PIX2PIX_PATH = str(Path(__file__).parent.parent / "Ink_removal_weights/norm_mixed/latest_net_G.pth")
+DEVICE = torch.device("cuda")
 TILE_H = 256
 TILE_W = 256
 TILE_STRIDE_FACTOR_H = 1

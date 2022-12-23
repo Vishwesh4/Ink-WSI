@@ -16,12 +16,16 @@ class Labels:
         labels:List[Dict],
     )->None:
         self.labels = labels
+
+        self._initialize_labels()
+
+    def _initialize_labels(self):
         #Initialize all the keys
         for key in self.labels[0].keys():
             setattr(self,key,{})
         
         self._populate_fields()
-
+    
     def _populate_fields(self)->None:
         for i in range(len(self.labels)):
             for key,value in self.labels[i].items():

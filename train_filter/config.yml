@@ -1,6 +1,6 @@
 ENGINE: #For this section ensure none of the keys are missing
   epochs: 150
-  save_loc: /home/ramanav/projects/rrg-amartel/Digital_Pathology/Public_Datasets/tiger-training-data  #Empty save loc indicates no save location
+  save_loc:  #Empty save loc indicates no save location
   resume_loc: #Empty resume loc indicates no need to resume
   transfer_loc: 
   save_freq: 20

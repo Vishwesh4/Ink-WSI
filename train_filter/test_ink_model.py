@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+import argparse
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
@@ -26,11 +27,20 @@ torch.backends.cudnn.benchmark = False
 np.random.seed(random_seed)
 random.seed(random_seed)
 
-df = pd.read_excel("~/Downloads/pairs.ods")
-ink_slide_path = "/amartel_data4/Flow/DCIS_prediction/DCIS_Precise_20x/"
-clean_path = "/labs3/amartel_data3/histology/Data/DCIS_cohort/PRECISE_NoRT/"
+#Get paths
+parser = argparse.ArgumentParser()
+parser.add_argument("-d", help="csv file location with slide names",required=True)
+parser.add_argument("-i", help="ink slide location path",required=True)
+parser.add_argument("-c", help="clean slide location path",required=True)
+args = parser.parse_args()
 
+df = pd.read_excel(args.d)
+ink_slide_path = args.i
+clean_path = args.c
+
+#Assuming csv file has two headers ink slide and clean slide
 slide_path = [str( Path(ink_slide_path) / (str(df["Ink Slides"][i])+".svs" ) ) for i in range(len(df))]
+#Sedeen automatically saves all annotations in a folder named sedeen in the location where all slides are saved
 annotation_dir = str( Path(ink_slide_path) / Path("sedeen") )
 
 TILE_H = 256

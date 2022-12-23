@@ -33,6 +33,9 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
         parser.add_argument('--mode',type=str,default="train",help="Train/Test")
         parser.add_argument('--stride_h',type=float,default=5,help="Stride factor with tile size 256 in y direction")
         parser.add_argument('--stride_w',type=float,default=5,help="Stride factor with tile size 256 in x direction")
+        parser.add_argument('--pair_csv',type=str,help="csv path for pair of data")
+        parser.add_argument('--ink_slide_pth',type=str,help="path for all ink slides")
+        parser.add_argument('--clean_slide_pth',type=str,help="path for all clean slides")
         if is_train==False:
             parser.set_defaults(mode="test")  # specify dataset-specific default values
 
@@ -63,6 +66,7 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
         pair_list = [(str( Path(clean_path) / (str(df["Clean Slides"][i])+".svs" ) ),str( Path(ink_slide_path) / (str(df["Ink Slides"][i])+".svs" ) ))
                 for i in range(len(df))]
         annotation_dir = str( Path(ink_slide_path) / Path("sedeen") )
+        #For the experiments I have provided annotations for faster processing
         ink_labelset = {"clean":"#00ff00ff","ink":"#ff0000ff"}
 
         BaseDataset.__init__(self, opt)

@@ -116,7 +116,7 @@ if __name__ == '__main__':
 
             all_calc.append((reference_calc,removal_calc))
             all_label.append(data['label'])
-            if i % 50 == 0:  # save images to an HTML file
+            if i % 1 == 0:  # save images to an HTML file
                 print('processing (%04d)-th image... %s' % (i, img_path))
                 save_images(webpage,(reference_calc,removal_calc), visuals, img_path, aspect_ratio=opt.aspect_ratio, width=opt.display_winsize, use_wandb=opt.use_wandb)
         webpage.save()  # save the HTML
