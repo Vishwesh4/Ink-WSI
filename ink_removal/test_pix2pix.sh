@@ -12,7 +12,7 @@ nohup python test_ink.py \
  --checkpoints_dir $checkpoints_dir_path \
  --results_dir $results_dir_path \
  --gpu_ids 0 \
- --dataset_mode pairinkcolorwise \
+ --dataset_mode pairink \
  --direction AtoB \
  --stride_h 1 \
  --stride_w 1 \
