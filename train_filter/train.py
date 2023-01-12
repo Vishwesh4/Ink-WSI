@@ -22,7 +22,7 @@ parser.add_argument("-c", help="config location",required=True)
 args = parser.parse_args()
 
 config_path = args.c
-location_mod = args.l
+#location_mod = args.l
 
 mnist_trainer = utils.TrainEngine(config_pth=config_path)
 mnist_trainer.run()
