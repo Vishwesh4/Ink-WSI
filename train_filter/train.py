@@ -18,11 +18,11 @@ import trainer
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", help="config location",required=True)
-parser.add_argument("-l", help="location modifier of dataset incase such as for compute canada",required=True)
+#parser.add_argument("-l", help="location modifier of dataset incase such as for compute canada",required=True)
 args = parser.parse_args()
 
 config_path = args.c
 location_mod = args.l
 
-mnist_trainer = utils.TrainEngine(config_pth=config_path,location_mod=location_mod)
+mnist_trainer = utils.TrainEngine(config_pth=config_path)
 mnist_trainer.run()
