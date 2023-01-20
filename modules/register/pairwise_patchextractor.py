@@ -181,3 +181,27 @@ class Pairwise_Extractor:
     @property
     def inv_proj_matrix(self):
         return self.M_inv
+    
+    
+if __name__=="__main__":
+    size_img = (256,256)
+
+    #Read slides
+    img_ink_path = "img1.svs"
+    img_noink_path = "img2.svs"
+
+    # #Read region from ink
+    x_point,y_point = (14349,12345)
+
+    patch_extractor = Pairwise_Extractor.from_path(src_path=img_noink_path, dest_path=img_ink_path, plot=True)
+
+    start = time.time()
+    ink_img, src_patch, reg_noink = patch_extractor.extract(x_point,y_point,size_img)
+    end = time.time()
+    print("Time taken:{}".format(end-start))
+
+    plt.show()
+    
+    
+    
+    
