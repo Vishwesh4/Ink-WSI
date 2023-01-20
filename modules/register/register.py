@@ -136,4 +136,39 @@ class ImageRegister:
         top_left_y = min([dst_in_int[0, 0, 1], dst_in_int[1, 0, 1], dst_in_int[2, 0, 1], dst_in_int[3, 0, 1]])
         bot_right_x = max([dst_in_int[0, 0, 0], dst_in_int[1, 0, 0], dst_in_int[2, 0, 0], dst_in_int[3, 0, 0]])
         bot_right_y = max([dst_in_int[0, 0, 1], dst_in_int[1, 0, 1], dst_in_int[2, 0, 1], dst_in_int[3, 0, 1]])
-        return top_left_y, bot_right_y, top_left_x, bot_right_x,
+        return top_left_y, bot_right_y, top_left_x, bot_right_x
+
+if __name__=="__main__":
+    #Read images
+    orig_image = cv2.imread("img1.png")
+    reg_image = cv2.imread("img2.png")
+
+    # two image object for registration
+    ImageRegister.set_downsample_percent(100)
+    I_realHE = ImageRegister(image=orig_image)
+    I_virtualHE = ImageRegister(image=reg_image)
+
+    # prepare two images for registration
+    I_virtualHE.prepare_img_registration()
+    I_realHE.prepare_img_registration()
+    
+    #Plotting original images
+    fig = plt.figure(num="Orig Images")
+    plt.subplot(1,2,1)
+    plt.imshow(I_realHE.prepared)
+    plt.subplot(1,2,2)
+    plt.imshow(I_virtualHE.prepared)
+    plt.show()
+    
+    # perform registration and plot the matches
+    good, M = I_virtualHE.perform_registration(I_realHE, draw_match=True)
+    
+    #Plot registered image
+    fig = plt.figure(num="Registered Images")
+    plt.subplot(1,3,1)
+    plt.imshow(I_virtualHE.im)
+    I_virtualHE.warp_img(M, (I_realHE.im.shape[1], I_realHE.im.shape[0]))
+    plt.subplot(1,3,2)
+    plt.imshow(I_virtualHE.warped)
+    plt.subplot(1,3,3)
+    plt.imshow(I_realHE.im)
