@@ -1,3 +1,10 @@
+"""
+The code was developed by 
+Wenchao Han
+Sunnybrook Research Institute
+University of Toronto Medical Biophysics
+wenchao.han@sri.utoronto.ca
+"""
 import os
 
 import cv2
