@@ -84,6 +84,6 @@ If you want to contact, you can reach the authors by raising an issue or
  email at vishweshramanathan@mail.utoronto.ca
 
 ## Acknowledgments
-- The registeration code `./modules/register/register.py` was developed by Wenchao Han
+- The registeration code `./modules/register/register.py` was developed by Wenchao Han at Sunnybrook Research Institute (wenchao.han@sri.utoronto.ca)
 - The pix2pix code was taken from [link](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix)
 - The `./modules/metrics/quality_metrics.py` code was taken from [link](https://github.com/smujiang/WSIPenMarkingRemoval)
