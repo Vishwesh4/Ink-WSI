@@ -88,6 +88,7 @@ If you want to contact, you can reach the authors by raising an issue or
 - The pix2pix code was taken from [link](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix)
 - The `./modules/metrics/quality_metrics.py` code was taken from [link](https://github.com/smujiang/WSIPenMarkingRemoval)
 ## Cite
+```
 @inproceedings{ramanathan2023ink,
   title={Ink removal in whole slide images using hallucinated data},
   author={Ramanathan, Vishwesh and Han, Wenchao and Bassiouny, Dina and Rakovitch, Eileen and Martel, Anne L},
@@ -97,3 +98,4 @@ If you want to contact, you can reach the authors by raising an issue or
   year={2023},
   organization={SPIE}
 }
+```
