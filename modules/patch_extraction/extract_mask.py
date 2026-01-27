@@ -14,7 +14,7 @@ def extract_mask(wsi_path, threshold=0.1, kernel_size=9):
         #Select level with dimension around 1000 otherwise it becomes too big
         if levels[0]>1000 or levels[1]>1000:
             break
-    img = scan.read_region((0,0),len(level_dimensions)-1,levels).convert('RGB')
+    img = scan.read_region((0,0),len(level_dimensions)-1-i,levels).convert('RGB')
     #Apply threshold on LAB
     img=np.array(img).astype('uint8')
     #get mask
