@@ -59,9 +59,9 @@ class PairinkDataset(BaseDataset, Pairwise_ExtractAnnot):
         - get image paths and meta information of the dataset.
         - define the image transformation.
         """
-        df = pd.read_excel("~/Downloads/pairs.ods")
-        ink_slide_path = "/amartel_data4/Flow/DCIS_prediction/DCIS_Precise_20x/"
-        clean_path = "/labs3/amartel_data3/histology/Data/DCIS_cohort/PRECISE_NoRT/"
+        df = pd.read_excel(opt.pair_csv)
+        ink_slide_path = opt.ink_slide_pth
+        clean_path = opt.clean_slide_pth
 
         pair_list = [(str( Path(clean_path) / (str(df["Clean Slides"][i])+".svs" ) ),str( Path(ink_slide_path) / (str(df["Ink Slides"][i])+".svs" ) ))
                 for i in range(len(df))]

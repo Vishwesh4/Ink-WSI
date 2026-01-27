@@ -33,6 +33,8 @@ DATASET:
 
 LOGGER:
   subclass_name: ink
+  use_wandb: True
+  watch_gradients: False
   project_name: ink-filter
   run_name: ink_more_color_v2
   notes: ink filter trained on tiger dataset, added more colors
@@ -48,6 +50,7 @@ OPTIMIZER:
   weight_decay: 0.00001
 
 SCHEDULER:
+  epoch_wise: True
   module_name: torch.optim.lr_scheduler
   subclass_name: ReduceLROnPlateau
   mode: min
