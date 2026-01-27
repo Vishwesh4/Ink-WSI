@@ -76,7 +76,10 @@ ink_deploy = Ink_deploy(filter_path:str=INK_PATH,
                         pix2pix_path:str=PIX2PIX_PATH, 
                         device=torch.device("cpu"))
 ```
-### 
+#### Registration module
+For the pair wise patch registration, we developed a simple way to register the slide and use a computationally efficient way to extract pair of patches from the registered slides. For the methodology please refer to `Pairwise Patch Extraction.pdf`.
+
+###
 ## Authors
 - Vishwesh Ramanathan ([@Vishwesh4](https://github.com/Vishwesh4))
 ## Contact
